@@ -41,8 +41,8 @@
     },
     "_scale": {
       "__type__": "cc.Vec3",
-      "x": 0.1406709790858233,
-      "y": 0.1406709790858233,
+      "x": 0.6051971997891179,
+      "y": 0.6051971997891179,
       "z": 1
     },
     "_quat": {
@@ -681,9 +681,6 @@
       "__id__": 8
     },
     "_enabled": true,
-    "content": {
-      "__id__": 14
-    },
     "horizontal": false,
     "vertical": true,
     "inertia": true,
@@ -692,6 +689,12 @@
     "bounceDuration": 0.23,
     "scrollEvents": [],
     "cancelInnerEvents": true,
+    "_N$content": {
+      "__id__": 14
+    },
+    "content": {
+      "__id__": 14
+    },
     "_N$horizontalScrollBar": null,
     "_N$verticalScrollBar": {
       "__id__": 12
@@ -2205,9 +2208,6 @@
       "__id__": 43
     },
     "_enabled": true,
-    "content": {
-      "__id__": 49
-    },
     "horizontal": false,
     "vertical": true,
     "inertia": true,
@@ -2216,6 +2216,12 @@
     "bounceDuration": 0.23,
     "scrollEvents": [],
     "cancelInnerEvents": true,
+    "_N$content": {
+      "__id__": 49
+    },
+    "content": {
+      "__id__": 49
+    },
     "_N$horizontalScrollBar": null,
     "_N$verticalScrollBar": {
       "__id__": 47

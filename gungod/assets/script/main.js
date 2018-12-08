@@ -5,35 +5,106 @@ cc.Class({
     extends: cc.Component,
 
     properties: {
-        node_display: cc.Node,
-        display: cc.Node
+
     },
 
 
     onLoad: function() {
         this.dsize = cc.view.getDesignResolutionSize();
-        this.subContextView = this.display.getComponent("cc.WXSubContextView");
-        this.subContextView.enabled = false;
+        //this.subContextView = this.display.getComponent("cc.WXSubContextView");
+        //this.subContextView.enabled = false;
 
         this.subdt = 0;
         this.userInfo = {};
         this.uploadScoreDt = 0;
 
         this.res = cc.find("Canvas").getComponent("res");
+        //cc.game.setFrameRate(30);
         this.initData();
         this.initUI();
         this.addListener();
         storage.playMusic(this.res.audio_mainBGM);
 
-        this.wxGetUserInfo();
-        this.wxOpenQuan();
-        this.wxVideoLoad();
+        //this.wxGetUserInfo();
+        //this.wxOpenQuan();
+        //this.wxVideoLoad();
 
-        this.node_display.active = false;
+        //this.node_display.active = false;
 
         var self = this;
         this.qianqista = qianqista;
-        qianqista.init("wx35c2e9513b8cc097","8a1126dfbcf8ca52750956ba8adde717","测试",function(){
+        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+            BK.Script.logToConsole = 1;
+        var score = storage.getScore();
+        this.uploadScore(score,this.initNet.bind(this));
+    },
+
+    uploadScore: function(score,callback)
+    {
+        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+        {
+            if(!score)
+                score = 0;
+            var data = {
+                userData: [
+                    {
+                        openId: GameStatusInfo.openId,
+                        startMs: ((new Date()).getTime()-24*60*60*1000).toString(),    //必填。 游戏开始时间。单位为毫秒，<font color=#ff0000>类型必须是字符串</font>
+                        endMs: ((new Date()).getTime()+3000*24*60*60*1000).toString(),  //必填。 游戏结束时间。单位为毫秒，<font color=#ff0000>类型必须是字符串</font>
+                        scoreInfo: {
+                            score: score //分数，类型必须是整型数
+                        }
+                    }
+                ],
+                // type 描述附加属性的用途
+                // order 排序的方式，
+                // 1: 从大到小，即每次上报的分数都会与本周期的最高得分比较，如果大于最高得分则覆盖，否则忽略
+                // 2: 从小到大，即每次上报的分数都会与本周期的最低得分比较，如果低于最低得分则覆盖，否则忽略（比如酷跑类游戏的耗时，时间越短越好）
+                // 3: 累积，即每次上报的积分都会累积到本周期已上报过的积分上
+                // 4: 直接覆盖，每次上报的积分都会将本周期的得分覆盖，不管大小
+                // 如score字段对应，上个属性.
+                attr: {
+                    score: {
+                        type: 'rank',
+                        order: 1
+                    }
+                }
+            };
+
+            // gameMode: 游戏模式，如果没有模式区分，直接填 1
+            // 必须配置好周期规则后，才能使用数据上报和排行榜功能
+            BK.Script.log(1,1,'---------上传分数 --------' + callback);
+            BK.QQ.uploadScoreWithoutRoom(1, data, function(errCode, cmd, data) {
+                // 返回错误码信息
+                BK.Script.log(1,1,'------111---上传分数失败!错误码：' + errCode);
+                if(callback)
+                {
+                    BK.Script.log(1,1,'---------上传分数失败!  1' + callback);
+                    callback();
+                }
+                else
+                {
+                    BK.Script.log(1,1,'---------上传分数失败!  2' + callback);
+                }
+
+                if (errCode !== 0) {
+                    BK.Script.log(1,1,'---------上传分数失败!错误码：' + errCode);
+                }
+
+            });
+
+        }
+        else
+        {
+            if(callback)
+                callback();
+        }
+    },
+
+    initNet: function()
+    {
+        var self = this;
+        qianqista.init("4598","测试",function(){
             qianqista.datas(function(res){
                 console.log('my datas:', res);
                 if(res.state == 200)
@@ -42,6 +113,7 @@ cc.Class({
                 }
             });
         });
+
         qianqista.control(function(res){
             console.log('my control:', res);
             if(res.state == 200)
@@ -51,6 +123,16 @@ cc.Class({
 
             }
         });
+
+        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+        {
+            BK.Script.log(1,1,'---------qianqista.init：');
+            BK.onEnterForeground(function(){
+                BK.Script.log(1,1,"---onEnterForeground----");
+
+                storage.playMusic(self.res.audio_mainBGM);
+            });
+        }
     },
 
     initData: function()
@@ -237,7 +319,7 @@ cc.Class({
 
         this.GAME.state = "start";
         this.GAME.score = 0;
-        this.GAME.fuhuonum = 3;
+        this.GAME.fuhuonum = 10;
         this.GAME.maxlv = 1;
         this.GAME.currLv = 0;
         var levelData = JSON.stringify(this.res.levels[this.GAME.currLv]);
@@ -416,16 +498,16 @@ cc.Class({
             {
                 this.GAME.heroFireDt = 0;
 
-                if(this.enemys.length>0)
-                {
-                    var enemy = this.enemys[0];
-                    this.enemyHurt(enemy,100,cc.v2(0,0));
-                }
+                //if(this.enemys.length>0)
+                //{
+                //    var enemy = this.enemys[0];
+                //    this.enemyHurt(enemy,100,cc.v2(0,0));
+                //}
 
-                //this.addSkillBullet(this.hero,cc.v2(0,1).rotateSelf(cc.misc.degreesToRadians(this.hero.circle.rotation)));
-                //this.addSkillBullet(this.hero,cc.v2(0,1).rotateSelf(cc.misc.degreesToRadians(this.hero.circle.rotation+90)));
-                //this.addSkillBullet(this.hero,cc.v2(0,1).rotateSelf(cc.misc.degreesToRadians(this.hero.circle.rotation+180)));
-                //this.addSkillBullet(this.hero,cc.v2(0,1).rotateSelf(cc.misc.degreesToRadians(this.hero.circle.rotation+270)));
+                this.addSkillBullet(this.hero,cc.v2(0,1).rotateSelf(cc.misc.degreesToRadians(this.hero.circle.rotation)));
+                this.addSkillBullet(this.hero,cc.v2(0,1).rotateSelf(cc.misc.degreesToRadians(this.hero.circle.rotation+90)));
+                this.addSkillBullet(this.hero,cc.v2(0,1).rotateSelf(cc.misc.degreesToRadians(this.hero.circle.rotation+180)));
+                this.addSkillBullet(this.hero,cc.v2(0,1).rotateSelf(cc.misc.degreesToRadians(this.hero.circle.rotation+270)));
             }
         }
         else if(this.hero.config.fireType == 3)
@@ -433,16 +515,16 @@ cc.Class({
             if(this.GAME.heroFireDt > 0.05)
             {
                 this.GAME.heroFireDt = 0;
-                if(this.enemys.length>0)
-                {
-                    var enemy = this.enemys[0];
-                    this.enemyHurt(enemy,100,cc.v2(0,0));
-                }
-
-                //for(var i=0;i<8;i++)
+                //if(this.enemys.length>0)
                 //{
-                //    this.addSkillBullet(this.hero,cc.v2(0,1).rotateSelf(cc.misc.degreesToRadians(this.hero.circle.rotation+360/8*i)));
+                //    var enemy = this.enemys[0];
+                //    this.enemyHurt(enemy,100,cc.v2(0,0));
                 //}
+
+                for(var i=0;i<8;i++)
+                {
+                    this.addSkillBullet(this.hero,cc.v2(0,1).rotateSelf(cc.misc.degreesToRadians(this.hero.circle.rotation+360/8*i)));
+                }
             }
         }
     },
@@ -499,7 +581,7 @@ cc.Class({
         {
             var enemy = this.enemys[j];
             var dis = enemy.position.sub(this.hero.position).mag();
-            if(dis<130)
+            if(dis<100)
             {
                 this.enemyHurt(enemy,100,cc.v2(0,0));
                 if(this.hero.config.lv > 1)
@@ -713,7 +795,7 @@ cc.Class({
 
     judgeFuhuo: function()
     {
-        if(this.GAME.fuhuonum>0 && this.GAME.share)
+        if(this.GAME.fuhuonum>0 )//&& this.GAME.share
         {
             this.openFuhuo();
         }
@@ -792,22 +874,27 @@ cc.Class({
             this.updateBulletColl(dt);
 
             this.uploadScoreDt += dt;
-            if(this.uploadScoreDt > 20)
+            if(this.uploadScoreDt > 10 && Math.floor(this.uploadScoreDt)%20 == 0)
             {
-                this.uploadScoreDt = 0;
+                //this.uploadScoreDt = 0;
                 this.wxUploadScore(Math.floor(this.GAME.score));
+                this.wxBannerHide();
+
+            }
+            if(this.uploadScoreDt > 10 && Math.floor(this.uploadScoreDt)%30 == 0)
+            {
                 this.wxBannerShow();
             }
         }
-        else
-        {
-            this.subdt += dt;
-            if(this.subdt > 0.08)
-            {
-                this.subdt = 0;
-                this._updaetSubDomainCanvas();
-            }
-        }
+        //else
+        //{
+        //    this.subdt += dt;
+        //    if(this.subdt > 0.08)
+        //    {
+        //        this.subdt = 0;
+        //        this._updaetSubDomainCanvas();
+        //    }
+        //}
     },
 
 
@@ -961,10 +1048,10 @@ cc.Class({
     {
         if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
         {
-            if(active)
-                this.quan_button.show();
-            else
-                this.quan_button.hide();
+            //if(active)
+            //    this.quan_button.show();
+            //else
+            //    this.quan_button.hide();
         }
     },
 
@@ -973,70 +1060,79 @@ cc.Class({
         //if(cc.isValid(this.node_over))
         //    this.node_over.hide();
         var self = this;
-        this.node_display.runAction(cc.sequence(
-            cc.scaleTo(0.2,1,0).easing(cc.easeSineOut()),
-            cc.callFunc(function(){
-                self.node_display.active = false;
-            })
-        ));
+        //this.node_display.runAction(cc.sequence(
+        //    cc.scaleTo(0.2,1,0).easing(cc.easeSineOut()),
+        //    cc.callFunc(function(){
+        //        self.node_display.active = false;
+        //    })
+        //));
 
         if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
         {
-            wx.postMessage({ message: "closeOver" });
+            //wx.postMessage({ message: "closeOver" });
         }
     },
 
     wxCloseRank: function()
     {
         var self = this;
-        this.node_display.runAction(cc.sequence(
-            cc.scaleTo(0.2,1,0).easing(cc.easeSineOut()),
-            cc.callFunc(function(){
-                self.node_display.active = false;
-            })
-        ));
+        //this.node_display.runAction(cc.sequence(
+        //    cc.scaleTo(0.2,1,0).easing(cc.easeSineOut()),
+        //    cc.callFunc(function(){
+        //        self.node_display.active = false;
+        //    })
+        //));
         if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
-            wx.postMessage({ message: "closeRank" });
+        {
+            //wx.postMessage({ message: "closeRank" });
+        }
     },
 
     wxRank: function()
     {
-        this.node_display.active = true;
-        this.node_display.opacity = 0;
-        this.node_display.runAction(cc.sequence(
-            cc.scaleTo(0,1,0),
-            cc.fadeIn(0),
-            cc.scaleTo(0.3,1,1).easing(cc.easeSineOut())
-        ));
+        //this.node_display.active = true;
+        //this.node_display.opacity = 0;
+        //this.node_display.runAction(cc.sequence(
+        //    cc.scaleTo(0,1,0),
+        //    cc.fadeIn(0),
+        //    cc.scaleTo(0.3,1,1).easing(cc.easeSineOut())
+        //));
         if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
-            wx.postMessage({ message: "friendRank" });
+        {
+            //wx.postMessage({ message: "friendRank" });
+        }
     },
 
     wxOverRank: function(score,playerId,gunId)
     {
-        this.node_display.active = true;
-        this.node_display.opacity = 0;
-        this.node_display.runAction(cc.sequence(
-            cc.scaleTo(0,1,0),
-            cc.fadeIn(0),
-            cc.scaleTo(0.3,1,1).easing(cc.easeSineOut())
-        ));
+        //this.node_display.active = true;
+        //this.node_display.opacity = 0;
+        //this.node_display.runAction(cc.sequence(
+        //    cc.scaleTo(0,1,0),
+        //    cc.fadeIn(0),
+        //    cc.scaleTo(0.3,1,1).easing(cc.easeSineOut())
+        //));
         if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
-            wx.postMessage({ message: "overRank",score:score,playerId:playerId,gunId:gunId });
+        {
+            //wx.postMessage({ message: "overRank",score:score,playerId:playerId,gunId:gunId });
+        }
     },
 
 
     wxUploadScore: function(score)
     {
         if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
-            wx.postMessage({ message: "updateScore",score:score });
+        {
+            //wx.postMessage({ message: "updateScore",score:score });
+            this.uploadScore(score);
+        }
     },
 
     wxGropShare: function()
     {
         if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
         {
-            var query = "channel=groupsharemenu";
+            //var query = "channel=groupsharemenu";
             var title = "爱玩枪神的小姐姐，身材不会差哟！";
             var imageUrl = cc.url.raw("resources/zhuanfa.jpg");
             if(this.GAME.sharepic)
@@ -1044,16 +1140,27 @@ cc.Class({
             if(this.GAME.sharetxt)
                 title = this.GAME.sharetxt;
 
-            wx.shareAppMessage({
-                query:query,
-                title: title,
-                imageUrl: imageUrl,
-                success: function(res)
+            var info = {};
+            info.channel = "groupsharemenu";
+            var query = JSON.stringify(info);
+
+            BK.QQ.shareToArk(0, title, imageUrl, true, query,function (errCode, cmd, data) {
+                if (errCode == 0) {
+                    BK.Script.log(1, 1," ret:" + data.ret +  // 是否成功 (0:成功，1：不成功)
+                    " aioType:" + data.aioType + // 聊天类型 （1：个人，4：群，5：讨论组，6：热聊）
+                    " gameId:" + data.gameId); // 游戏 id
+                    if(data.ret == 0)
+                    {
+
+                    }
+                    else
+                    {
+
+                    }
+                }
+                else
                 {
-                    cc.log(res);
-                },
-                fail: function()
-                {
+
                 }
             });
         }
@@ -1089,14 +1196,41 @@ cc.Class({
     {
         var self = this;
         this.videocallback = callback;
-        storage.pauseMusic();
+        storage.stopMusic();
         if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
         {
-            this.rewardedVideoAd.show().catch(function(err){
-                self.rewardedVideoAd.load().then(function(){
-                    self.rewardedVideoAd.show();
-                });
+            var videoAd = BK.Advertisement.createVideoAd();
+            videoAd.onLoad(function () {
+                //加载成功
+                BK.Script.log(1,1,"onLoad")
             });
+
+            videoAd.onPlayStart(function () {
+                //开始播放
+                videoAd.jiangli = false;
+                BK.Script.log(1,1,"onPlayStart")
+            });
+
+            videoAd.onPlayFinish(function () {
+                //播放结束
+                videoAd.jiangli = true;
+                BK.Script.log(1,1,"onPlayFinish")
+            });
+
+            videoAd.onError(function (err) {
+                //加载失败
+                BK.Script.log(1,1,"onError code:"+err.code+" msg:"+err.msg);
+            });
+
+            videoAd.onClose(function (err) {
+                if(callback)
+                    callback(videoAd.jiangli);
+
+                storage.stopMusic();
+                storage.playMusic(self.res.audio_mainBGM);
+            });
+
+            videoAd.show();
         }
         else
         {
@@ -1107,35 +1241,44 @@ cc.Class({
 
     wxBannerShow: function()
     {
-        this.wxBannerHide();
+        var self = this;
+        if(self.bannershow)
+            return;
         if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
         {
-            var dpi = cc.view.getDevicePixelRatio();
-            var s = cc.view.getFrameSize();
-
-            this.bannerAd = wx.createBannerAd({
-                adUnitId: 'adunit-c5b2e0e80388172e',
-                style: {
-                    left: 0,
-                    top: s.height/dpi-300/3.5,
-                    width: 300
-                }
-            });
-            var bannerAd = this.bannerAd;
-            this.bannerAd.onResize(function(res){
-                bannerAd.style.left = s.width/2-res.width/2;
-                bannerAd.style.top = s.height-res.height;
-            });
-            this.bannerAd.show();
+            if(self.bannerAd == null)
+            {
+                self.bannerAd = BK.Advertisement.createBannerAd({
+                    viewId:1003
+                });
+                self.bannerAd.onLoad(function () {
+                    //广告加载成功
+                });
+                self.bannerAd.onError(function (err) {
+                    //加载失败
+                    var msg = err.msg;
+                    var code = err.code;
+                    BK.Script.log(1, 1, "展示失败 msg:" + msg +"     "+code);
+                });
+            }
+            if(self.bannerAd)
+            {
+                //self.bannerAd.isshows = true;
+                self.bannershow = true;
+                self.bannerAd.show();
+            }
         }
     },
 
     wxBannerHide: function()
     {
+        var self = this;
         if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
         {
-            if(this.bannerAd)
-                this.bannerAd.hide();
+            self.bannershow = false;
+            if(self.bannerAd)
+                self.bannerAd.destory();
+            self.bannerAd = null;
         }
     }
 });

@@ -29,13 +29,10 @@
     "EditBox",
     "VideoPlayer",
     "WebView",
-    "AudioSource",
     "Animation",
     "Collider",
     "Physics",
-    "StudioComponent",
-    "Intersection",
-    "Native NetWork"
+    "StudioComponent"
   ],
   "fit-height": false,
   "fit-width": true,

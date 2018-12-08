@@ -33,7 +33,7 @@
             });
  *
  *  3.支付统计
-    qianqista.pay(money)
+ qianqista.pay(money)
  *
  *  4.分享统计
  *  qianqista.share(isSuccess)
@@ -54,142 +54,126 @@
  *  qianqista.getGrpupId(encryptedData,iv,callback)
  *  */
 module.exports = {
-    gameId: "", //游戏id
-    secret: "",//密匙
+    gameId: 0, //游戏id
+    appId: "",//appid
     gameName: "",//游戏名
     channel: "",//渠道
     openid: "",
     userName: "",
     session_key: "",
-    power: 0,//授权状态
-    url: "https://77qqup.com:442/sta/",
-    avatarUrl: "",//头像
+    power: 1,//授权状态
+    url: "http://qqplay.77qqup.com:8082/sta/",
     state: 0, //0 未初始化 1已经初始化
     updatePower: false,
     initcallback: null,
-    logincallback: null,
-    showcallback: null,
     hidecallback: null,
+    showcallback: null,
     fromid:"",
     pkfromid:"",
-    init: function(gameId,secret,gameName,initcallback,showcallback)
+    pkroomtype: 0,
+    avatarUrl: "",//头像
+    init: function(appId,gameName,initcallback,showcallback)
     {
-        this.gameId = gameId;
-        this.secret = secret;
-        this.gameName = gameName;
-        this.initcallback = initcallback;
-        this.showcallback = showcallback;
         var self = this;
         if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
         {
-            var opts = wx.getLaunchOptionsSync();
-            if(opts)
+            this.gameId = GameStatusInfo.gameId + "";
+            this.openid = GameStatusInfo.openId;
+        }
+        else
+        {
+            this.gameId = appId + "001";
+            this.openid = "wx00001";
+        }
+
+        this.appId = appId;
+        this.gameName = gameName;
+        this.initcallback = initcallback;
+        this.showcallback = showcallback;
+
+
+        if(this.gameId && this.openid && this.openid.length>0)
+        {
+            this.state = 1;
+            if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
             {
-                var path = opts.path;
-                var query = opts.query;
-                var scene = opts.scene;
-                if(path && path.indexOf('channel=') != -1)
+                var query = GameStatusInfo.gameParam;
+                if(query && query.length>0)
                 {
-                    this.channel = path.substr(path.indexOf("channel=")+8);
-                    if(this.channel.length>16)
+                    var datas = JSON.parse(query);
+                    if(datas.channel)
+                        this.channel = datas.channel;
+                    if(datas.fromid)
                     {
-                        this.channel = this.channel.substr(0,15);
+                        this.fromid = datas.fromid;
+                        this.pkfromid = datas.fromid;
+                    }
+                    if(datas.roomType)
+                        this.pkroomtype = datas.roomType;
+
+                    if(this.power == 1 && this.channel && this.channel == "shareonline" && this.pkfromid && this.pkroomtype>0)
+                    {
+                        if(this.showcallback)
+                            this.showcallback();
                     }
                 }
-                if(this.channel == "" || this.channel == null)
-                {
-                    if(query && query.channel && query.channel.length > 0)
-                        this.channel = query.channel;
-                }
-                if(this.channel == "" || this.channel == null)
-                {
-                    this.channel = scene+"";
-                }
 
-                if(query && query.fromid && query.fromid.length > 0)
-                {
-                    this.fromid = query.fromid;
-                    console.log('fromid:', query.fromid);
-                }
-                var sto_channel = cc.sys.localStorage.getItem("channel");
-                if(!sto_channel)
-                    cc.sys.localStorage.setItem("channel",this.channel);
+
+                //BK.MQQ.Account.getNick(this.openid,function(openID,nick){
+                //    self.userName = nick;
+                //
+                //});
+                self.getAvatarUrl(function(){
+                    self.initdata();
+                });
+
+                BK.Script.log(1,1,"---1111111----:" + query);
+            }
+            else{
+                self.userName = "测试用户名";
+                self.avatarUrl = "http://thirdqq.qlogo.cn/g?b=sdk&k=woicoWCwib0xzYz7zoUtResA&s=100&t=1507643904";
+                this.initdata();
             }
 
-            console.log('opts:', opts);
-            console.log('channel:', this.channel);
 
-            wx.onShow(function(res){
-                self.open();
-
-                console.log('onShow:', res);
-                console.log('power:', self.power);
-
-                var query = res.query;
-                if(query && query.fromid && query.fromid.length > 0)
-                {
-                    self.pkfromid = query.fromid;
-                }
-                if(self.power == 1 && query && query.channel && query.channel == "shareonline" && self.pkfromid)
-                {
-                    if(self.showcallback)
-                        self.showcallback();
-                }
-
-            });
-
-            wx.onHide(function(){
-                if(self.hidecallback)
-                    self.hidecallback();
-            });
         }
-        else
-        {
-            if(cc.sys.browserType == "chrome")
-            {
-                this.openid = "test001";
-                this.userName = "test001";
-                this.avatarUrl = "https://77qqup.com:442/img/wxgame/49234a872c294891aa98877d51679180.png";
-                this.fromid = "test002";
-                this.pkfromid = "test002";
-            }
-            else
-            {
-                this.openid = "test002";
-                this.userName = "test002";
-                this.avatarUrl = "https://77qqup.com:442/img/wxgame/1b6474f6563845c4a5afd5b9a797c017.png";
-                this.fromid = "test001";
-            }
-        }
+        // JSON.stringify(data)
+
     },
 
-    setHideCallback: function(hidecallback)
+    login: function()
     {
-        this.hidecallback = hidecallback;
-    },
-
-    login: function(isSuccess, userInfo,callback)
-    {
-        this.logincallback = callback;
-        if(isSuccess)
-        {
-            if(!userInfo)
-                console.error("--------","userInfo is null");
-            this.userName = userInfo.nickName;
-            this.power = 1;
-            this.avatarUrl = userInfo.avatarUrl;
-            console.log('userInfo:', userInfo);
-        }
-        else
-        {
-            this.updatePower = true;
-        }
-
         var self = this;
-        this.getOpenId(function(){
-            self.state = 1;
-            self.initdata();
-            console.log('----init end ----');
+
+    },
+
+    getAvatarUrl: function(callback)
+    {
+        var self = this;
+        var attr = "score";//使用哪一种上报数据做排行，可传入score，a1，a2等
+        var order = 1;     //排序的方法：[ 1: 从大到小(单局)，2: 从小到大(单局)，3: 由大到小(累积)]
+        var rankType = 0; //要查询的排行榜类型，0: 好友排行榜，1: 群排行榜，2: 讨论组排行榜，3: C2C二人转 (手Q 7.6.0以上支持)
+        // 必须配置好周期规则后，才能使用数据上报和排行榜功能
+        BK.QQ.getRankListWithoutRoom(attr, order, rankType, function(errCode, cmd, data) {
+            BK.Script.log(1,1,"-------getAvatarUrl callback  cmd" + cmd + " errCode:" + errCode + "  data:" + JSON.stringify(data));
+            // 返回错误码信息
+            if (errCode != 0) {
+                BK.Script.log(1,1,'------获取排行榜数据失败!错误码：' + errCode);
+            }
+            // 解析数据
+            if (data) {
+                for(var i=0; i < data.data.ranking_list.length; ++i) {
+                    var rd = data.data.ranking_list[i];
+                    if(rd.selfFlag)
+                    {
+                        self.avatarUrl = rd.url;
+                        self.userName = rd.nick;
+                        break;
+                    }
+                }
+            }
+            if(callback)
+                callback();
         });
     },
 
@@ -220,20 +204,6 @@ module.exports = {
                 }
 
             });
-            if(this.updatePower && this.power == 1)
-            {
-                this.updatePower = false;
-                this.sendRequest("power",{gameId:this.gameId,
-                    channel:this.channel,openid:this.openid,power:this.power},function(res){
-                    console.log("power:",res);
-                });
-            }
-
-            if(this.power == 1 && self.channel == "shareonline")
-            {
-                if(this.logincallback)
-                    this.logincallback();
-            }
         }
     },
 
@@ -313,6 +283,8 @@ module.exports = {
     {
         if(this.state == 1)
         {
+            // console.log("send datas:"+JSON.stringify(params));
+            console.log("suploaddatas:",datas);
             this.httpPost("uploaddatas",{gameId:this.gameId,openid:this.openid,datas:datas},function(res){
                 console.log("uploaddatas:",res);
                 if(callback)
@@ -410,7 +382,7 @@ module.exports = {
         };
         // note: In Internet Explorer, the timeout property may be set only after calling the open()
         // method and before calling the send() method.
-        xhr.timeout = 5000; // 5 seconds for timeout
+        xhr.timeout = 20000; // 5 seconds for timeout
         // var btoa = btoa("test:test");
         var btoa = require('buffer').Buffer.from('test:test').toString('base64');
         xhr.setRequestHeader("Authorization", "Basic " + btoa);
@@ -438,28 +410,33 @@ module.exports = {
             }
         };
         xhr.open("POST", requestURL, true);
-        //xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         if (cc.sys.isNative) {
             xhr.setRequestHeader("Accept-Encoding", "gzip,deflate");
         }
 
         // note: In Internet Explorer, the timeout property may be set only after calling the open()
         // method and before calling the send() method.
-        xhr.timeout = 5000;// 5 seconds for timeout
+        xhr.timeout = 20000;// 5 seconds for timeout
 
-        //var datas = "";
-        //var i = 0;
-        //for (var k in params) {
-        //    if (i != 0) {
-        //        datas += "&";
-        //    }
-        //    datas += k + "=" + params[k];
-        //    i++;
-        //}
-        //
-        //xhr.send(datas);
-        xhr.send(params);
+        var datas = "";
+        var i = 0;
+        for (var k in params) {
+            if (i != 0) {
+                datas += "&";
+            }
+            datas += k + "=" + params[k];
+            i++;
+        }
+
+        xhr.send(datas);
+    },
+
+    setHideCallback: function(hidecallback)
+    {
+        this.hidecallback = hidecallback;
     }
+
 
 
 };

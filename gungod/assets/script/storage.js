@@ -2,10 +2,28 @@
  * Created by guang on 18/7/19.
  */
 module.exports = {
+    audioContext: null,
+    effectContext: null,
     playMusic: function(music)
     {
         if(this.getMusic() == 1)
-            cc.audioEngine.play(music,true,0.6);
+        {
+            //this.stopMusic();
+            //if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+            //{
+            //    if(this.audioContext == null)
+            //    {
+            //        this.audioContext = BK.createAudioContext();
+            //        this.audioContext.loop = true;
+            //        this.audioContext.src = "GameRes:///"+music;
+            //    }
+            //    this.audioContext.play();
+            //}
+            //else
+            //{
+                cc.audioEngine.play(music,true,0.6);
+            //}
+        }
     },
 
     pauseMusic: function()
@@ -22,13 +40,36 @@ module.exports = {
 
     stopMusic: function()
     {
-        cc.audioEngine.stopAll();
+        //if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+        //{
+        //    if(this.audioContext)
+        //        this.audioContext.pause();
+        //}
+        //else
+        //{
+            cc.audioEngine.stopAll();
+        //}
     },
 
     playSound: function(sound)
     {
         if(this.getSound() == 1)
-            cc.audioEngine.play(sound,false,1);
+        {
+            //if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+            //{
+            //    if(this.effectContext == null)
+            //    {
+            //        this.effectContext = BK.createAudioContext({'type':'effect'});
+            //    }
+            //    //播放多个音效
+            //    this.effectContext.src = "GameRes:///"+sound;
+            //    this.effectContext.play()
+            //}
+            //else
+            //{
+                cc.audioEngine.play(sound,false,1);
+            //}
+        }
     },
 
     preloadSound: function()
@@ -148,14 +189,14 @@ module.exports = {
     {
         if(this.getVibrate() == 1 && (cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS))
         {
-            if(isLong)
-            {
-                wx.vibrateLong({});
-            }
-            else
-            {
-                wx.vibrateShort({});
-            }
+            //if(isLong)
+            //{
+            //    wx.vibrateLong({});
+            //}
+            //else
+            //{
+            //    wx.vibrateShort({});
+            //}
         }
     },
 

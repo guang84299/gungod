@@ -20,6 +20,20 @@ cc.Class({
         this.bg = cc.find("bg",this.node);
         this.node_fuhuo_num = cc.find("bg/num",this.node).getComponent("cc.Label");
         this.node_fuhuo_desc = cc.find("bg/desc",this.node).getComponent("cc.Label");
+
+        this.node_fuhuo_vedio = cc.find("bg/fuhuo_vedio",this.node);
+        this.node_fuhuo_share = cc.find("bg/fuhuo_share",this.node);
+
+        if(this.main.GAME.fuhuonum%3 == 0)
+        {
+            this.node_fuhuo_vedio.active = false;
+            this.node_fuhuo_share.active = true;
+        }
+        else
+        {
+            this.node_fuhuo_vedio.active = true;
+            this.node_fuhuo_share.active = false;
+        }
     },
 
     updateUI: function()
@@ -76,7 +90,7 @@ cc.Class({
         var self = this;
         if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
         {
-            var query = "channel=groupsharemenu";
+            //var query = "channel=groupsharemenu";
             var title = "爱玩枪神的小姐姐，身材不会差哟！";
             var imageUrl = cc.url.raw("resources/zhuanfa.jpg");
             if(this.main.GAME.sharepic)
@@ -84,46 +98,54 @@ cc.Class({
             if(this.main.GAME.sharetxt)
                 title = this.main.GAME.sharetxt;
 
-            wx.shareAppMessage({
-                query:query,
-                title: title,
-                imageUrl: imageUrl,
-                success: function(res)
-                {
-                    if(res.shareTickets && res.shareTickets.length>0)
-                    {
-                        wx.getShareInfo({
-                            shareTicket: res.shareTickets[0],
-                            success: function(res)
-                            {
-                                console.log("------",res);
-                                self.main.qianqista.getGrpupId(res.encryptedData,res.iv,function(b,openGId,timestamp){
-                                    if(b==true && storage.judgeShareGroupState(openGId,timestamp))
-                                    {
-                                        self.res.showToast("复活成功");
+            var info = {};
+            info.channel = "groupsharemenu";
+            var query = JSON.stringify(info);
 
-                                        self.main.GAME.fuhuonum -= 1;
-                                        self.main.fuhuoEnd();
-                                        self.hide();
-                                    }
-                                    else
-                                    {
-                                        self.res.showToast("每个群每天只能转发一次");
-                                    }
-                                });
-                            }
-                        });
+            BK.QQ.shareToArk(0, title, imageUrl, true, query,function (errCode, cmd, data) {
+                if (errCode == 0) {
+                    BK.Script.log(1, 1," ret:" + data.ret +  // 是否成功 (0:成功，1：不成功)
+                    " aioType:" + data.aioType + // 聊天类型 （1：个人，4：群，5：讨论组，6：热聊）
+                    " gameId:" + data.gameId); // 游戏 id
+                    if(data.ret == 0)
+                    {
+                        self.res.showToast("复活成功");
+
+                        self.main.GAME.fuhuonum -= 1;
+                        self.main.fuhuoEnd();
+                        self.hide();
                     }
                     else
                     {
-                        self.res.showToast("请分享到群");
+
                     }
-                    cc.log(res);
-                },
-                fail: function()
+                }
+                else
                 {
+
                 }
             });
+
+            //BK.Share.share({
+            //    qqImgUrl: imageUrl,
+            //    summary: title,
+            //    extendInfo: query,
+            //    success: function(succObj){
+            //        BK.Console.log('Waaaah! share success', succObj.code, JSON.stringify(succObj.data));
+            //
+            //        self.res.showToast("复活成功");
+            //
+            //        self.main.GAME.fuhuonum -= 1;
+            //        self.main.fuhuoEnd();
+            //        self.hide();
+            //    },
+            //    fail: function(failObj){
+            //        BK.Console.log('Waaaah! share fail', failObj.code, JSON.stringify(failObj.msg));
+            //    },
+            //    complete: function(){
+            //        BK.Console.log('Waaaah! share complete');
+            //    }
+            //});
         }
         else
         {
