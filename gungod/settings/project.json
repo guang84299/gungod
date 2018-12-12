@@ -8,7 +8,38 @@
   },
   "collision-matrix": [
     [
+      false,
+      null,
+      null,
+      false,
+      false
+    ],
+    [
+      false,
+      false,
+      true,
       true
+    ],
+    [
+      false,
+      true,
+      false,
+      true,
+      true
+    ],
+    [
+      false,
+      true,
+      true,
+      false,
+      true
+    ],
+    [
+      false,
+      false,
+      true,
+      true,
+      false
     ]
   ],
   "design-resolution-height": 1280,
@@ -30,14 +61,16 @@
     "VideoPlayer",
     "WebView",
     "Animation",
-    "Collider",
-    "Physics",
     "StudioComponent"
   ],
   "fit-height": false,
   "fit-width": true,
   "group-list": [
-    "default"
+    "default",
+    "wall",
+    "enemy",
+    "bullet",
+    "platform"
   ],
   "simulator-orientation": false,
   "simulator-resolution": {
