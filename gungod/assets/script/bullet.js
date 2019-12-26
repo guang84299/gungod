@@ -34,7 +34,7 @@ cc.Class({
         if(this.colNum > this.maxColNum)
         {
             this.node.destroy();
-            this.game.isCanFire = true;
+            this.game.toFire();
         }
     },
 

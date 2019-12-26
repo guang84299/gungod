@@ -71,9 +71,9 @@ cc.Class({
         this.gameLayer = cc.find("layer_game/gameLayer",this.node_game);
         this.wall_bottom = cc.find("layer_game/wall/bottom",this.node_game);
 
-        this.player = cc.find("player",this.gameLayer);
-        this.player.hand = cc.find("player/hand",this.gameLayer);
-        this.player.aim = cc.find("player/hand/aim",this.gameLayer);
+        this.player = cc.find("player",this.layer_game);
+        this.player.hand = cc.find("player/hand",this.layer_game);
+        this.player.aim = cc.find("player/hand/aim",this.layer_game);
 
         this.bgColors = [
             cc.color(91,105,123),
@@ -100,6 +100,7 @@ cc.Class({
     startGame: function()
     {
         this.isCanFire = true;
+        this.currlevel = 0;
         this.initMap();
         this.state = "start";
     },
@@ -107,9 +108,10 @@ cc.Class({
     initMap: function()
     {
         //var s = cc.winSize;
+        this.enemys = [];
         var h = this.wall_bottom.y;
 
-        var map = config.levels[7];
+        var map = config.levels[this.currlevel];
         for(var i=0;i<map.platform.length;i++)
         {
             var platform = cc.instantiate(this.platform);
@@ -124,6 +126,7 @@ cc.Class({
             enemy.position = map.enemy[i];
             enemy.y += h;
             this.gameLayer.addChild(enemy);
+            this.enemys.push(enemy);
         }
     },
 
@@ -131,6 +134,16 @@ cc.Class({
     gameOver: function()
     {
 
+    },
+
+    nextLevel: function()
+    {
+        this.gameLayer.destroyAllChildren();
+        this.currlevel+=1;
+        if(this.currlevel>=config.levels.length)
+            this.currlevel = Math.floor(config.levels.length/2);
+        this.initMap();
+        this.isCanFire = true;
     },
 
     updatePlayer:function(pos,isUp)
@@ -165,6 +178,27 @@ cc.Class({
             this.gameLayer.addChild(bullet);
 
             this.isCanFire = false;
+        }
+    },
+
+    toFire: function()
+    {
+        var isPass = true;
+        for(var i=0;i<this.enemys.length;i++)
+        {
+            if(!this.enemys[i].isDie)
+            {
+                isPass = false;
+                break;
+            }
+        }
+        if(isPass)
+        {
+            this.nextLevel();
+        }
+        else
+        {
+            this.isCanFire = true;
         }
     },
 

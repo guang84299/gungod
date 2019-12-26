@@ -31,6 +31,8 @@ cc.Class({
             this.hand_right = cc.find("hand_right",this.node.parent);
         }
         this.enemy.isRemoveHandJoin = false;
+
+        this.enemy.isDie = false;
     },
 
     updateJoin: function()
@@ -50,6 +52,7 @@ cc.Class({
         //{
         //    coms[i].enabled = false;
         //}
+        this.enemy.isDie = true;
     },
 
     update: function(dt) {
