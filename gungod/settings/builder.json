@@ -25,7 +25,7 @@
     "REMOTE_SERVER_ROOT": "",
     "orientation": "portrait"
   },
-  "startScene": "7bbc7a7e-e533-4214-a6af-5c1510fa6c06",
+  "startScene": "e7cf7cf7-13e3-4331-a9db-cc3e003f7e08",
   "title": "gungod",
   "webOrientation": "auto",
   "wechatgame": {
@@ -39,10 +39,22 @@
   "zipCompressJs": true,
   "android-instant": {
     "REMOTE_SERVER_ROOT": "",
-    "pathPattern": "",
-    "scheme": "https",
     "host": "",
-    "skipRecord": false,
-    "recordPath": ""
-  }
+    "packageName": "org.cocos2d.gungod",
+    "pathPattern": "",
+    "recordPath": "",
+    "scheme": "https",
+    "skipRecord": false
+  },
+  "android": {
+    "packageName": "org.cocos2d.gungod"
+  },
+  "ios": {
+    "packageName": "org.cocos2d.gungod"
+  },
+  "mac": {
+    "packageName": "org.cocos2d.gungod"
+  },
+  "win32": {},
+  "appBundle": false
 }
