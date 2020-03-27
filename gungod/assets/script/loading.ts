@@ -119,6 +119,8 @@ export default class loading extends cc.Component {
             "prefab/game/platform",
             "prefab/game/floor",
             "prefab/game/player",
+            "prefab/game/enemy",
+            "prefab/game/bullet",
                     
             // "prefab/anim/qinwang",
            

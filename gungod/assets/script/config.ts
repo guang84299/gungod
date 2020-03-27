@@ -30,7 +30,20 @@ export const config = {
     bgcolor:[cc.color(36,106,206),cc.color(110,24,128),cc.color(25,112,133),cc.color(136,110,94),
         cc.color(89,89,89),cc.color(132,131,172),cc.color(134,152,118),cc.color(149,149,149),
         cc.color(24,128,93),cc.color(122,28,24),cc.color(24,95,128),cc.color(149,140,46),
-        cc.color(208,163,162),cc.color(107,133,148),cc.color(140,31,57),cc.color(86,127,22)]
+        cc.color(208,163,162),cc.color(107,133,148),cc.color(140,31,57),cc.color(86,127,22)],
+
+    levels:[
+        {id:1,floor:2},
+        {id:2,floor:5},
+        {id:3,floor:6},
+        {id:4,floor:6},
+        {id:5,floor:7},
+        {id:6,floor:7},
+        {id:7,floor:7},
+        {id:8,floor:8},
+        {id:9,floor:8},
+        {id:10,floor:8}
+    ]    
     
 };
 

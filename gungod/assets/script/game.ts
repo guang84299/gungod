@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { res } from "./res";
 import { config } from "./config";
 import { player } from "./game/player";
+import { enemy } from "./game/enemy";
 
 var gg = window["gg"];
 
@@ -19,6 +20,8 @@ export default class game extends cc.Component {
     gameMap: cc.Node = null;
     @property(cc.Label)
     coinLabel: cc.Label = null;
+    @property(cc.Node)
+    startLabel: cc.Node = null;
    
     maps = [];
     bgcolor = cc.color(36,106,206);
@@ -26,8 +29,12 @@ export default class game extends cc.Component {
     opas = [1,0.68,0.68,0.88,1.4,3.6,5];
     gameState = "stop";
     currFloor = 0;
+    canNextFloor = true;
+    isBoss = false;
     
     playerSc = null;
+    enemySc = null;
+    levelConf = config.levels[0];
     
     onLoad () {
         this.initPhysics();
@@ -55,7 +62,7 @@ export default class game extends cc.Component {
         cc.director.getPhysicsManager().enabledAccumulator = false;
         cc.director.getPhysicsManager().gravity = cc.v2(0,0);
 
-        // cc.director.getPhysicsManager()._debugDrawer.node.group = "game";
+        cc.director.getPhysicsManager()._debugDrawer.node.group = "game";
         // cc.director.getPhysicsManager().attachDebugDrawToCamera(this.camera);
         // var manager = cc.director.getCollisionManager();
         // manager.enabled = true;
@@ -86,6 +93,10 @@ export default class game extends cc.Component {
     initData(){
         gg.coin = storage.getStorage(storage.coin);
         this.bgcolor = config.bgcolor[Math.floor(Math.random()*config.bgcolor.length)];
+    }
+
+    initUI(){
+
     }
 
     initMap(){
@@ -218,17 +229,118 @@ export default class game extends cc.Component {
     }
 
     initPlayer(){
+        var platform = this.maps[0];
+
         var playerNode = cc.instantiate(res.loads["prefab_game_player"]);
-        playerNode.y = 300;
+        playerNode.y =  platform.height/2 + platform.y + playerNode.height/2;
+        playerNode.x = platform.width/4;
+        playerNode.scaleX = -1;
         this.gameMap.addChild(playerNode,9999);
         this.playerSc = playerNode.getComponent(player);
     }
 
     startGame(){
+        this.startLabel.active = false;
         this.excNext();
     }
 
     excNext(){
+        if(!this.canNextFloor) return;
+        this.canNextFloor = false;
+        var platform = null;
+        for(var i=0;i<this.maps.length;i++)
+        {
+            platform = this.maps[i];
+            if(!platform["move"]) break;
+        }
+        
+        this.createEnemys(platform);
+        this.setPhysics(platform,true);
+    }
+
+    createEnemys(platform){
+        if(this.isBoss)
+        {
+            this.bossJump(platform);
+            return;
+        }
+        var floornum = platform["floornum"];
+
+        var enemyNum =  Math.floor(Math.random()*floornum+1);
+       if(enemyNum>this.levelConf.maxEnemyNum) enemyNum = this.levelConf.maxEnemyNum;
+        if(this.currFloor>=this.levelConf.floor)
+        {
+            this.isBoss = true;
+            enemyNum = 1;
+        }
+
+        var fls = [];
+        var num = 0;
+        while(fls.length<enemyNum)
+        {
+            var fn = Math.floor(Math.random()*floornum);
+            var b = true;
+            for(var i=0;i<fls.length;i++)
+            {
+                if(fls[i] == fn)
+                {
+                    b = false;
+                    break;
+                }
+            }
+            if(b) fls.push(fn);
+            else{
+                num++;
+                if(num>10)
+                {
+                    fls.sort(function(a,b){return a-b;});
+                    fn = fls[fls.length-1];
+                    fn = fn + 1;
+                    if(fn>floornum) 
+                    {
+                        fn = fls[0];
+                        fn = fn-1;
+                        if(fn<0) break;
+                    }
+                    fls.push(fn);
+                }
+            }
+        }
+        fls.sort(function(a,b){return a-b;});
+        
+        for(var n=1;n<=enemyNum;n++)
+        {
+            this.scheduleOnce(this.createEnemy.bind(this,platform,fls[n-1],n==enemyNum),0.5*(n-1));
+        }
+    }
+
+    createEnemy(platform,fn,isEnd){
+        var floornum = platform["floornum"];
+        var enemyNode = cc.instantiate(res.loads["prefab_game_enemy"]);
+        enemyNode.scaleX = this.currFloor%2==0 ? 1 : -1;
+        this.gameMap.addChild(enemyNode,9999);
+        this.enemySc = enemyNode.getComponent(enemy);
+
+        var tarx = 50*floornum + (platform.width/2-50*floornum)/2-25;
+        if(this.currFloor%2==0) tarx = -tarx;
+        var tary = platform.height/2+50*floornum + platform.y + enemyNode.height/2;
+
+        enemyNode.y = tary;
+        enemyNode.x = this.currFloor%2==0? -cc.winSize.width/2-100 : cc.winSize.width/2+100;
+
+        var jumpPos = [cc.v2(tarx,tary)];
+        // var fn = enemyNum-n;// Math.floor(Math.random()*n);
+        for(var i=1;i<=fn;i++)
+        {
+            var x =  50*floornum-25 - 50*i;
+            if(this.currFloor%2==0) x = -x;
+            jumpPos.push(cc.v2(x,tary-50*i));
+        }
+        if(this.isBoss) this.enemySc.setBoss(true);
+        this.enemySc.jump(jumpPos,this.currFloor,isEnd);
+    }
+
+    playerJump(){
         var platform = null;
         for(var i=0;i<this.maps.length;i++)
         {
@@ -236,12 +348,20 @@ export default class game extends cc.Component {
             if(!platform["move"]) break;
         }
         var floornum = platform["floornum"];
-        var x = (50*floornum + (platform.width/2-50*floornum)/2);
+        var x = (50*floornum + (platform.width/2-50*floornum)/2)-25;
         if(this.currFloor%2==0) x = -x;
         
-        var y = platform.height/2+50*floornum + platform.y;
+        var y = platform.height/2+50*floornum + platform.y + this.playerSc.node.height/2;
+        this.playerSc.jump(cc.v2(x,y),this.currFloor);
+    }
 
-        this.playerSc.jump(cc.v2(x,y));
+    bossJump(platform){
+        var floornum = platform["floornum"];
+        var x = (50*floornum + (platform.width/2-50*floornum)/2)-25;
+        if(this.currFloor%2==0) x = -x;
+        
+        var y = platform.height/2+50*floornum + platform.y + this.enemySc.node.height/2;
+        this.enemySc.bossjump(cc.v2(x,y),this.currFloor);
     }
 
     nextFloor(){
@@ -262,13 +382,26 @@ export default class game extends cc.Component {
         })
         .start();
         this.addMap(time);
-        // this.updateOpa(time);
         this.currFloor ++;
+        this.setPhysics(platform,false);
+
+        this.canNextFloor = true;
+        this.excNext();
     }
 
+    toOver(){
+        this.gameState = "over";
+    }
+
+    toWin(){
+        this.gameState = "over";
+    }
    
     touchDown(pos){
-
+        if(this.gameState == "start")
+        {
+            this.playerSc.fire();
+        }
     }
 
     touchMove(pos){
@@ -280,10 +413,6 @@ export default class game extends cc.Component {
         {
             this.gameState = "start";
             this.startGame();
-        }
-        else if(this.gameState == "start")
-        {
-            this.excNext();
         }
     }
 
