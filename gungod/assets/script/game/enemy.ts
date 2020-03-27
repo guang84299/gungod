@@ -1,6 +1,6 @@
 
 const {ccclass, property} = cc._decorator;
-
+import { res } from "../res";
 @ccclass
 export  class enemy extends cc.Component {
 
@@ -10,14 +10,14 @@ export  class enemy extends cc.Component {
     tail = null;
 
     isBoss = false;
-    hp = 50;
+    hp = 15;
 
 
     // onLoad () {}
 
     start () {
         this.game = cc.find("Canvas").getComponent("game");
-        this.aimDraw = cc.find("aim",this.node);
+        this.aimDraw = cc.find("gun/aim",this.node);
         this.aimDraw.active = false;
         this.gun = cc.find("gun",this.node);
         this.tail = cc.find("tail",this.node);
@@ -34,7 +34,7 @@ export  class enemy extends cc.Component {
         cc.find("body",this.node).active = enable;
     }
 
-    jump(toPoss,dir,isEnd){
+    jump(toPoss,dir){
         var h =  100;
         var time = 0.4;
         var ang = 360;
@@ -45,7 +45,6 @@ export  class enemy extends cc.Component {
             ac.then(cc.spawn(cc.jumpTo(time,toPoss[i],h*2,1),cc.rotateBy(time,ang)))
         }
         ac.call(() => { 
-            if(isEnd)
             this.game.playerJump();
             this.setPhysics(true);
         })
@@ -56,8 +55,9 @@ export  class enemy extends cc.Component {
     bossjump(toPos,dir){
         this.setPhysics(false);
         var h = toPos.y - this.node.y;
-        var time = toPos.sub(this.node.position).mag()/500/2;
-        var ang = 720;
+        if(h>200) h = 200;
+        var time = 0.8;
+        var ang = 360;
         if(dir%2 == 1) ang = -ang;
 
         cc.tween(this.node)
@@ -71,18 +71,46 @@ export  class enemy extends cc.Component {
         .start();
     }
 
-    die(){
+    die(pos){
+        var isDie = false;
         if(this.isBoss)
         {
             this.hp -= 5;
             if(this.hp<=0) 
             {
-                this.node.destroy();
+                isDie = true;                
                 this.game.toWin();
             }
         }
         else
-        this.node.destroy();
+        {
+            isDie = true;   
+        }
+        if(isDie)
+        {
+            var dir = this.node.position.sub(pos).normalize();
+            var toPos = this.node.position.add(dir.mul(cc.winSize.width/2));
+            var ang = 360;
+            if(cc.v2(dir).signAngle(cc.v2(0,1))>0) ang = -ang;
+            cc.tween(this.node)
+            .then(cc.spawn(cc.jumpTo(0.5,toPos,200,1),cc.rotateBy(0.5,ang)))
+            .removeSelf()
+            .start();
+        }
+    }
+
+    fire(time){
+        var p1 = this.aimDraw.parent.convertToWorldSpaceAR(this.aimDraw.position);
+        var p2 = this.game.playerSc.node.position;
+         //添加子弹
+         var bullet = res.getObjByPool("prefab_game_bullet");
+         bullet.position = this.game.gameMap.convertToNodeSpaceAR(p1);
+         this.game.gameMap.addChild(bullet,9999);
+         cc.tween(bullet)
+         .to(time,{position:p2})
+         .delay(time/2)
+         .removeSelf()
+         .start();
     }
 
     update(dt){

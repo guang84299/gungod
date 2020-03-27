@@ -612,7 +612,7 @@ export const sdk = {
         if(window["wx"])
         {
             gg.qianqista.event(eventName);
-            wx.aldSendEvent(eventName);
+            // wx.aldSendEvent(eventName);
         }
         
     }

@@ -43,14 +43,13 @@ export default class game extends cc.Component {
     }
 
     start () {
-        this.initMap();
-        this.initPlayer();
+       this.initGame();
     }
 
     initPhysics()
     {
         cc.director.getPhysicsManager().enabled = true;
-        cc.director.getPhysicsManager().debugDrawFlags = cc.PhysicsManager.DrawBits.e_aabbBit ;
+        // cc.director.getPhysicsManager().debugDrawFlags = cc.PhysicsManager.DrawBits.e_aabbBit ;
         // cc.PhysicsManager.DrawBits.e_jointBit |
         // cc.PhysicsManager.DrawBits.e_shapeBit;
 
@@ -62,7 +61,7 @@ export default class game extends cc.Component {
         cc.director.getPhysicsManager().enabledAccumulator = false;
         cc.director.getPhysicsManager().gravity = cc.v2(0,0);
 
-        cc.director.getPhysicsManager()._debugDrawer.node.group = "game";
+        // cc.director.getPhysicsManager()._debugDrawer.node.group = "game";
         // cc.director.getPhysicsManager().attachDebugDrawToCamera(this.camera);
         // var manager = cc.director.getCollisionManager();
         // manager.enabled = true;
@@ -92,11 +91,30 @@ export default class game extends cc.Component {
 
     initData(){
         gg.coin = storage.getStorage(storage.coin);
-        this.bgcolor = config.bgcolor[Math.floor(Math.random()*config.bgcolor.length)];
+       
     }
 
     initUI(){
 
+    }
+
+    initGame(){
+        this.maps = [];
+        this.bgcolor = config.bgcolor[Math.floor(Math.random()*config.bgcolor.length)];
+        this.platformZindex = 9999;
+        this.gameState = "stop";
+        this.currFloor = 0;
+        this.canNextFloor = true;
+        this.isBoss = false;
+        this.levelConf = config.levels[0];
+
+        this.startLabel.active = true;
+        this.camera.node.y = 0;
+        this.gameMap.destroyAllChildren();
+        this.initData();
+        this.initMap();
+        this.initPlayer();
+        cc.director.getScheduler().setTimeScale(1);
     }
 
     initMap(){
@@ -265,56 +283,15 @@ export default class game extends cc.Component {
             return;
         }
         var floornum = platform["floornum"];
-
-        var enemyNum =  Math.floor(Math.random()*floornum+1);
-       if(enemyNum>this.levelConf.maxEnemyNum) enemyNum = this.levelConf.maxEnemyNum;
         if(this.currFloor>=this.levelConf.floor)
         {
             this.isBoss = true;
-            enemyNum = 1;
         }
-
-        var fls = [];
-        var num = 0;
-        while(fls.length<enemyNum)
-        {
-            var fn = Math.floor(Math.random()*floornum);
-            var b = true;
-            for(var i=0;i<fls.length;i++)
-            {
-                if(fls[i] == fn)
-                {
-                    b = false;
-                    break;
-                }
-            }
-            if(b) fls.push(fn);
-            else{
-                num++;
-                if(num>10)
-                {
-                    fls.sort(function(a,b){return a-b;});
-                    fn = fls[fls.length-1];
-                    fn = fn + 1;
-                    if(fn>floornum) 
-                    {
-                        fn = fls[0];
-                        fn = fn-1;
-                        if(fn<0) break;
-                    }
-                    fls.push(fn);
-                }
-            }
-        }
-        fls.sort(function(a,b){return a-b;});
-        
-        for(var n=1;n<=enemyNum;n++)
-        {
-            this.scheduleOnce(this.createEnemy.bind(this,platform,fls[n-1],n==enemyNum),0.5*(n-1));
-        }
+        var fn = Math.floor(Math.random()*floornum);
+        this.createEnemy(platform,fn);
     }
 
-    createEnemy(platform,fn,isEnd){
+    createEnemy(platform,fn){
         var floornum = platform["floornum"];
         var enemyNode = cc.instantiate(res.loads["prefab_game_enemy"]);
         enemyNode.scaleX = this.currFloor%2==0 ? 1 : -1;
@@ -337,7 +314,7 @@ export default class game extends cc.Component {
             jumpPos.push(cc.v2(x,tary-50*i));
         }
         if(this.isBoss) this.enemySc.setBoss(true);
-        this.enemySc.jump(jumpPos,this.currFloor,isEnd);
+        this.enemySc.jump(jumpPos,this.currFloor);
     }
 
     playerJump(){
@@ -357,10 +334,11 @@ export default class game extends cc.Component {
 
     bossJump(platform){
         var floornum = platform["floornum"];
-        var x = (50*floornum + (platform.width/2-50*floornum)/2)-25;
+        var fn = Math.floor(Math.random()*floornum);
+        var x =  50*floornum-25 - 50*fn;// (50*floornum + (platform.width/2-50*floornum)/2)-25 + 50*fn;
         if(this.currFloor%2==0) x = -x;
         
-        var y = platform.height/2+50*floornum + platform.y + this.enemySc.node.height/2;
+        var y = platform.height/2+50*floornum + platform.y + this.enemySc.node.height/2 - 50*fn;
         this.enemySc.bossjump(cc.v2(x,y),this.currFloor);
     }
 
@@ -391,10 +369,12 @@ export default class game extends cc.Component {
 
     toOver(){
         this.gameState = "over";
+        this.scheduleOnce(this.initGame.bind(this),1);
     }
 
     toWin(){
         this.gameState = "over";
+        this.scheduleOnce(this.initGame.bind(this),1);
     }
    
     touchDown(pos){
