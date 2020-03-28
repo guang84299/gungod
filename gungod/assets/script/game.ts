@@ -250,11 +250,12 @@ export default class game extends cc.Component {
         var platform = this.maps[0];
 
         var playerNode = cc.instantiate(res.loads["prefab_game_player"]);
+        this.gameMap.addChild(playerNode,9999);
+        this.playerSc = playerNode.getComponent(player);
+        this.playerSc.initConf();
         playerNode.y =  platform.height/2 + platform.y + playerNode.height/2;
         playerNode.x = platform.width/4;
         playerNode.scaleX = -1;
-        this.gameMap.addChild(playerNode,9999);
-        this.playerSc = playerNode.getComponent(player);
     }
 
     startGame(){

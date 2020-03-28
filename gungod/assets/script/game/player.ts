@@ -1,6 +1,8 @@
 
 const {ccclass, property} = cc._decorator;
 import { res } from "../res";
+import { storage } from "../storage";
+import { config } from "../config";
 @ccclass
 export  class player extends cc.Component {
 
@@ -18,6 +20,22 @@ export  class player extends cc.Component {
         this.aimDraw.active = false;
         this.gun = cc.find("gun",this.node);
         this.tail = cc.find("tail",this.node);
+    }
+
+    initConf(){
+        var player = cc.find("player",this.node);
+        var gun = cc.find("gun",this.node);
+        var aim = cc.find("aim",this.node);
+
+        var skinid = storage.getStorage(storage.skinid);
+        player.getComponent(cc.Sprite).spriteFrame = res.loads["images_player_"+skinid];
+        this.node.setContentSize(player.getContentSize());
+
+        var gunid = storage.getStorage(storage.gunid);
+        gun.getComponent(cc.Sprite).spriteFrame = res.loads["images_gun_"+gunid];
+        gun.setAnchorPoint(config.gunConf[gunid-1].anchor);
+
+        aim.position = config.gunConf[gunid-1].aim;
     }
 
     jump(toPos,dir){

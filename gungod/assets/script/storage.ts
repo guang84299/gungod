@@ -10,37 +10,14 @@ export const storage = {
     vibrate: "vibrate",
     first: "first",
     coin: "coin",
-    gold: "gold",
-    hasrole:"hasrole",
-    xuanchuanval: "xuanchuanval",
-    chaozuoid: "chaozuoid",
-    tiaozhanid: "tiaozhanid",
-    fuli: "fuli",
-    laodianrate: "laodianrate",
-    guiziid: "guiziid",
+    skinid: "skinid",
+    hasskin:"hasskin",
+    gunid: "gunid",
+    hasgun: "hasgun",
     onlinetime: "onlinetime",
-    videonum: "videonum",
-    bankanum: "bankanum",
-    bankatime: "bankatime",
-    bankarate: "bankarate",
-    bankalastsa: "bankalastsa",//上次办卡收益
-    totalcoin: "totalcoin",
-    cainum: "cainum",
-    caitime: "caitime",
-    caiusenum: "caiusenum",
-    jingying: "jingying",
-    renwuid: "renwuid",
-    shipin: "shipin",
-    shipinnum: "shipinnum",
-    baoliao: "baoliao",
-    tucao: "tucao",
-    shengzhi: "shengzhi",
-    shouyix2: "shouyix2",
     loginday:"loginday",
     logintime:"logintime",
     yindao:"yindao",
-    roleAdUnlock3:"roleAdUnlock3",
-    roleAdUnlock7:"roleAdUnlock7",
 
     defaultVal: {
         music:1,
@@ -48,37 +25,14 @@ export const storage = {
         vibrate:1,
         first:0,
         coin:0,
-        gold:0,
-        hasrole: [],
-        xuanchuanval: 1,
-        chaozuoid: [],
-        tiaozhanid: 0,
-        fuli: [],
-        laodianrate: 1,
-        guiziid: [],
+        skinid:1,
+        hasskin: [1],
+        gunid: 1,
+        hasgun: [1],
         onlinetime: 0,
-        videonum: 0,
-        bankanum: 0,
-        bankatime: 0,
-        bankarate: 0,
-        bankalastsa: 0,
-        totalcoin: 0,
-        cainum: 0,
-        caitime: 0,
-        caiusenum: 0,
-        jingying: [],
-        renwuid: [],
-        shipin: {},
-        shipinnum: 0,
-        baoliao: {},
-        tucao: {},
-        shengzhi: {},
-        shouyix2: {},
         loginday: 0,
         logintime: 0,
         yindao: 0,
-        roleAdUnlock3 : 0,
-        roleAdUnlock7: 0
     },
 
     setStorage: function(key,val)
@@ -112,34 +66,6 @@ export const storage = {
         gg.qianqista.uploaddatas(data);
     },
 
-    updateRenwu: function(type,num){
-        var renwuid = this.getStorage(storage.renwuid);
-        var datas = gg.res.loads["conf_renwu"];
-        for(var i=0;i<datas.length;i++)
-        {
-            if(datas[i].type == type) 
-            {
-                var id = Number(datas[i].id);
-                var itemData = null;
-                for(var j=0;j<renwuid.length;j++)
-                {
-                    if(renwuid[j]["id"] && renwuid[j]["id"] == id)
-                    {
-                        itemData = renwuid[j];
-                        break;
-                    }
-                }
-                if(!itemData) 
-                {
-                    itemData = {id:id,num:0,lingqu:0};
-                    renwuid.push(itemData);
-                }
-                itemData.num += num;
-            }
-        }
-       
-        this.setStorage(storage.renwuid,renwuid);
-    },
 
     scientificToNumber: function(num) {
         var str = num.toString();

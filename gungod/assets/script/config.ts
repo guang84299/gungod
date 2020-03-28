@@ -32,6 +32,29 @@ export const config = {
         cc.color(24,128,93),cc.color(122,28,24),cc.color(24,95,128),cc.color(149,140,46),
         cc.color(208,163,162),cc.color(107,133,148),cc.color(140,31,57),cc.color(86,127,22)],
 
+    gunConf:[
+        {id:1,anchor:cc.v2(0.3,0.5), aim:cc.v2(43,-3)},
+        {id:2,anchor:cc.v2(0.34,0.5), aim:cc.v2(43,-2)},
+        {id:3,anchor:cc.v2(0.4,0.5), aim:cc.v2(38,0)},
+        {id:4,anchor:cc.v2(0.35,0.5), aim:cc.v2(77,-3)},
+        {id:5,anchor:cc.v2(0.38,0.5), aim:cc.v2(65,-4)},
+        {id:6,anchor:cc.v2(0.35,0.4), aim:cc.v2(66,-6)},
+        {id:7,anchor:cc.v2(0.32,0.5), aim:cc.v2(56,-1)},
+        {id:8,anchor:cc.v2(0.4,0.4), aim:cc.v2(71,-5)},
+        {id:9,anchor:cc.v2(0.35,0.4), aim:cc.v2(75,-5)},
+        {id:10,anchor:cc.v2(0.35,0.4), aim:cc.v2(88,-8)},
+        {id:11,anchor:cc.v2(0.4,0.5), aim:cc.v2(67,-8)},
+        {id:12,anchor:cc.v2(0.4,0.4), aim:cc.v2(55,-8)},
+        {id:13,anchor:cc.v2(0.35,0.4), aim:cc.v2(74,-4)},
+        {id:14,anchor:cc.v2(0.4,0.4), aim:cc.v2(83,0)},
+        {id:15,anchor:cc.v2(0.4,0.54), aim:cc.v2(66,-5)},
+        {id:16,anchor:cc.v2(0.45,0.54), aim:cc.v2(46,-5)},
+        {id:17,anchor:cc.v2(0.4,0.5), aim:cc.v2(40,-5)},
+        {id:18,anchor:cc.v2(0.38,0.5), aim:cc.v2(77,-7)},
+        {id:19,anchor:cc.v2(0.45,0.45), aim:cc.v2(64,-15)},
+        {id:20,anchor:cc.v2(0.4,0.5), aim:cc.v2(38,-2)}
+    ],    
+
     levels:[
         {id:1,floor:2},
         {id:2,floor:5},

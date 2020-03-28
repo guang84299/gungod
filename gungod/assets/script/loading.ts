@@ -126,11 +126,12 @@ export default class loading extends cc.Component {
            
             // "prefab/ui/toast"
         ];
-
-        // for(var i=1;i<=9;i++)
-        // {
-        //    this.purls.push("prefab/game/Res"+i);
-        // }
+        for(var i=1;i<=20;i++)
+        {
+            if(i<=19)
+                this.purls.push("images/player/player_"+i);
+            this.purls.push("images/gun/gun_"+i);     
+        }
         this.totalCount = this.purls.length;
         this.loadCount = 0;
         this.nowtime = new Date().getTime();
@@ -153,6 +154,13 @@ export default class loading extends cc.Component {
             if(path.indexOf("anims/") != -1)
             {
                 cc.loader.loadRes(this.purls[index],cc.SpriteAtlas, function(err, prefab)
+                {
+                    self.progressCallback(self.completedCount,self.totalCount,prefab,index);
+                });
+            }
+            else if(path.indexOf("images/") != -1)
+            {
+                cc.loader.loadRes(this.purls[index],cc.SpriteFrame, function(err, prefab)
                 {
                     self.progressCallback(self.completedCount,self.totalCount,prefab,index);
                 });
@@ -210,6 +218,7 @@ export default class loading extends cc.Component {
     }
 
     setRes(resource:any,index:number){
+        cc.log(resource);
         var url = this.purls[index];
         var pifx = "";
         if(url.indexOf("audio/") != -1)
@@ -230,16 +239,19 @@ export default class loading extends cc.Component {
             //console.error(url,cc.url.raw("resources/"+url));
             resource = JSON.parse(resource.text);
         }
+        else if(url.indexOf("images/") != -1)
+        {
+            pifx = "images_"+resource.name;
+        }
 
         if(url.indexOf("conf/") != -1)
             res.loads[pifx] = resource;
+        else if(url.indexOf("images/") != -1)
+            res.loads[pifx] = resource;    
         else
         {
             res.loads[pifx+resource.data.name] = resource;
         }
-            
-
-        // cc.log(res.loads);
     }
 
     startGame() {

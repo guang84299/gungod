@@ -25,13 +25,14 @@ export const res = {
         this.nodePools[name].put(obj); 
     },
 
-    setSpriteFrame: function(url,sp)
+    setSpriteFrame: function(url,sp,callback?:any)
     {
         cc.loader.loadRes(url, cc.SpriteFrame, function (err, spriteFrame) {
             if(!err && sp && cc.isValid(sp))
             {
                 var sf = sp.getComponent(cc.Sprite);
                 if(sf) sf.spriteFrame = spriteFrame;
+                if(callback) callback(spriteFrame);
                 //sp.getComponent("cc.Sprite").spriteFrame = spriteFrame;
             }
         });
