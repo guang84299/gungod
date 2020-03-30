@@ -121,17 +121,21 @@ export default class loading extends cc.Component {
             "prefab/game/player",
             "prefab/game/enemy",
             "prefab/game/bullet",
+            "prefab/game/hit",
                     
-            // "prefab/anim/qinwang",
+            "prefab/anim/smoke",
+            "prefab/anim/shell",
+            "prefab/anim/blood",
+            "prefab/anim/bigblood",
            
             // "prefab/ui/toast"
         ];
-        for(var i=1;i<=20;i++)
-        {
-            if(i<=19)
-                this.purls.push("images/player/player_"+i);
-            this.purls.push("images/gun/gun_"+i);     
-        }
+        // for(var i=1;i<=20;i++)
+        // {
+        //     if(i<=19)
+        //         this.purls.push("images/player/player_"+i);
+        //     this.purls.push("images/gun/gun_"+i);     
+        // }
         this.totalCount = this.purls.length;
         this.loadCount = 0;
         this.nowtime = new Date().getTime();
@@ -218,8 +222,9 @@ export default class loading extends cc.Component {
     }
 
     setRes(resource:any,index:number){
-        cc.log(resource);
         var url = this.purls[index];
+        cc.log(url,resource);
+
         var pifx = "";
         if(url.indexOf("audio/") != -1)
             pifx = "audio_";

@@ -1,6 +1,8 @@
 
 const {ccclass, property} = cc._decorator;
 import { res } from "../res";
+import { config } from "../config";
+var gg = window["gg"];
 @ccclass
 export  class enemy extends cc.Component {
 
@@ -12,6 +14,7 @@ export  class enemy extends cc.Component {
     isBoss = false;
     hp = 15;
 
+    conf = {color:cc.color(221,88,254)};
 
     // onLoad () {}
 
@@ -25,8 +28,29 @@ export  class enemy extends cc.Component {
         this.setPhysics(false);
     }
 
-    setBoss(isBoss){
+    initConf(isBoss,skinid,callback){
         this.isBoss = isBoss;
+        if(isBoss) this.conf = config.bossConf[skinid-1];
+        else this.conf = config.enemyConf[skinid-1];
+        var player = cc.find("player",this.node);
+        var tail = cc.find("tail",this.node);
+
+        var self = this;
+        var skinpath = "images/enemy/enemy_"+skinid;
+        if(isBoss) skinpath = "images/boss/boss_"+skinid;
+        res.setSpriteFrame(skinpath,player,function(){
+            self.node.setContentSize(player.getContentSize());
+            if(callback) callback();
+        });
+
+        tail.active = false;
+        res.setTexture(skinpath,function(texture){
+            tail.getComponent(cc.MotionStreak).texture = texture;
+            var rec = new cc.SpriteFrame(texture).getRect();
+            tail.getComponent(cc.MotionStreak).stroke = rec.width*0.8;
+            tail.active = true;
+            tail.y = -rec.height/2*0.9;
+        });
     }
 
     setPhysics(enable){
@@ -43,6 +67,16 @@ export  class enemy extends cc.Component {
         for(var i=0;i<toPoss.length;i++)
         {
             ac.then(cc.spawn(cc.jumpTo(time,toPoss[i],h*2,1),cc.rotateBy(time,ang)))
+            ac.call(()=>{
+                if(this.isBoss)
+                {
+                    this.game.cameraAni();
+                    gg.audio.playSound('audio/foot_boss_land');
+                }
+                else{
+                    gg.audio.playSound('audio/foot_1');
+                }
+            })
         }
         ac.call(() => { 
             this.game.playerJump();
@@ -50,6 +84,10 @@ export  class enemy extends cc.Component {
         })
         ac.start();
 
+        if(this.isBoss)
+        {
+            gg.audio.playSound('audio/boss_chu');
+        }
     }
 
     bossjump(toPos,dir){
@@ -64,6 +102,8 @@ export  class enemy extends cc.Component {
         .then(cc.spawn(cc.jumpTo(time,toPos,h*2,1),cc.rotateBy(time,ang)))
         // .to(0.2, { scaleX: dir%2==1?-1:1 }, { easing: 'sineIn'})
         .call(() => { 
+            this.game.cameraAni();
+            gg.audio.playSound('audio/foot_boss_land');
             this.node.scaleX = dir%2==1?-1:1;
             this.game.playerJump();
             this.setPhysics(true);
@@ -71,7 +111,7 @@ export  class enemy extends cc.Component {
         .start();
     }
 
-    die(pos){
+    die(pos,isHead){
         var isDie = false;
         if(this.isBoss)
         {
@@ -81,6 +121,11 @@ export  class enemy extends cc.Component {
                 isDie = true;                
                 this.game.toWin();
             }
+            cc.tween(this.node)
+                .by(0.05, { position: cc.v2(-20,0)},{easing:"sineIn"})
+                .by(0.05, { position: cc.v2(10,0)},{easing:"sineIn"})
+                .start();
+            gg.audio.playSound('audio/boss_hurt_'+(Math.floor(Math.random()*3+1)));
         }
         else
         {
@@ -97,6 +142,45 @@ export  class enemy extends cc.Component {
             .removeSelf()
             .start();
         }
+
+        if(isHead)
+        {
+            //特效
+            var bigblood = res.getObjByPool("prefab_anim_bigblood");
+            bigblood.position = this.node.position;
+            bigblood.scaleX = -this.node.scaleX;
+            this.game.gameMap.addChild(bigblood,9999);
+            bigblood.getComponent(cc.ParticleSystem).startColor = this.conf.color;
+            bigblood.getComponent(cc.ParticleSystem).endColor = this.conf.color;
+            
+            gg.audio.playSound('audio/hit_head');
+        }
+        else
+        {
+            var blood = res.getObjByPool("prefab_anim_blood");
+            blood.position = this.node.position;
+            blood.scaleX = -this.node.scaleX;
+            this.game.gameMap.addChild(blood,9999);
+            blood.getComponent(cc.ParticleSystem).startColor = this.conf.color;
+            blood.getComponent(cc.ParticleSystem).endColor = this.conf.color;
+
+            gg.audio.playSound('audio/hit_torso');
+        }
+
+        //添加击中特效
+        var hit = res.getObjByPool("prefab_game_hit");
+        hit.position = this.node.position;
+        hit.color = this.conf.color;
+        hit.opacity = 0;
+        this.game.gameMap.addChild(hit,9999);
+        cc.tween(hit)
+        .to(0.1,{scale:3,opacity:150},{easing:"sineIn"})
+        .to(0.1,{opacity:0},{easing:"sineIn"})
+        .call(()=>{
+            if(isHead) gg.audio.playSound('audio/hit_head_yuyin');
+        })
+        .removeSelf()
+        .start();
     }
 
     fire(time){
@@ -111,6 +195,8 @@ export  class enemy extends cc.Component {
          .delay(time/2)
          .removeSelf()
          .start();
+
+         gg.audio.playSound('audio/gun_1');
     }
 
     update(dt){

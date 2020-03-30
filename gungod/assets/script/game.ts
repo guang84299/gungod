@@ -44,6 +44,7 @@ export default class game extends cc.Component {
 
     start () {
        this.initGame();
+       gg.audio.playMusic(res.audio_music,0.5);
     }
 
     initPhysics()
@@ -252,10 +253,12 @@ export default class game extends cc.Component {
         var playerNode = cc.instantiate(res.loads["prefab_game_player"]);
         this.gameMap.addChild(playerNode,9999);
         this.playerSc = playerNode.getComponent(player);
-        this.playerSc.initConf();
-        playerNode.y =  platform.height/2 + platform.y + playerNode.height/2;
-        playerNode.x = platform.width/4;
-        playerNode.scaleX = -1;
+        this.playerSc.initConf(function(){
+            playerNode.y =  platform.height/2 + platform.y + playerNode.height/2;
+            playerNode.x = platform.width/4;
+            playerNode.scaleX = -1;
+        });
+        
     }
 
     startGame(){
@@ -299,23 +302,29 @@ export default class game extends cc.Component {
         this.gameMap.addChild(enemyNode,9999);
         this.enemySc = enemyNode.getComponent(enemy);
 
-        var tarx = 50*floornum + (platform.width/2-50*floornum)/2-25;
-        if(this.currFloor%2==0) tarx = -tarx;
-        var tary = platform.height/2+50*floornum + platform.y + enemyNode.height/2;
+        var enemyId = Math.floor(Math.random()*config.enemyConf.length+1);
+        if(this.isBoss) enemyId = Math.floor(Math.random()*config.bossConf.length+1);
+        var self = this;
+        this.enemySc.initConf(this.isBoss,enemyId,function(){
 
-        enemyNode.y = tary;
-        enemyNode.x = this.currFloor%2==0? -cc.winSize.width/2-100 : cc.winSize.width/2+100;
+            var tarx = 50*floornum + (platform.width/2-50*floornum)/2-25;
+            if(self.currFloor%2==0) tarx = -tarx;
+            var tary = platform.height/2+50*floornum + platform.y + enemyNode.height/2;
 
-        var jumpPos = [cc.v2(tarx,tary)];
-        // var fn = enemyNum-n;// Math.floor(Math.random()*n);
-        for(var i=1;i<=fn;i++)
-        {
-            var x =  50*floornum-25 - 50*i;
-            if(this.currFloor%2==0) x = -x;
-            jumpPos.push(cc.v2(x,tary-50*i));
-        }
-        if(this.isBoss) this.enemySc.setBoss(true);
-        this.enemySc.jump(jumpPos,this.currFloor);
+            enemyNode.y = tary;
+            enemyNode.x = self.currFloor%2==0? -cc.winSize.width/2-100 : cc.winSize.width/2+100;
+
+            var jumpPos = [cc.v2(tarx,tary)];
+            // var fn = enemyNum-n;// Math.floor(Math.random()*n);
+            for(var i=1;i<=fn;i++)
+            {
+                var x =  50*floornum-25 - 50*i;
+                if(self.currFloor%2==0) x = -x;
+                jumpPos.push(cc.v2(x,tary-50*i));
+            }
+            self.enemySc.jump(jumpPos,self.currFloor);
+
+        }); 
     }
 
     playerJump(){
@@ -365,7 +374,8 @@ export default class game extends cc.Component {
         this.setPhysics(platform,false);
 
         this.canNextFloor = true;
-        this.excNext();
+        this.scheduleOnce(this.excNext.bind(this),0.11);
+        // this.excNext();
     }
 
     toOver(){
@@ -395,6 +405,13 @@ export default class game extends cc.Component {
             this.gameState = "start";
             this.startGame();
         }
+    }
+
+    cameraAni(){
+        cc.tween(this.camera.node)
+        .by(0.05, { position: cc.v2(0,20)},{easing:"sineIn"})
+        .by(0.05, { position: cc.v2(0,-20)},{easing:"sineIn"})
+        .start();
     }
 
     update (dt) {

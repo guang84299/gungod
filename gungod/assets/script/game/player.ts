@@ -3,6 +3,7 @@ const {ccclass, property} = cc._decorator;
 import { res } from "../res";
 import { storage } from "../storage";
 import { config } from "../config";
+var gg = window["gg"];
 @ccclass
 export  class player extends cc.Component {
 
@@ -12,6 +13,7 @@ export  class player extends cc.Component {
     tail = null;
 
     isCanFire = false;
+    gunid = 1;
     // onLoad () {}
 
     start () {
@@ -22,20 +24,34 @@ export  class player extends cc.Component {
         this.tail = cc.find("tail",this.node);
     }
 
-    initConf(){
+    initConf(callback){
         var player = cc.find("player",this.node);
         var gun = cc.find("gun",this.node);
         var aim = cc.find("aim",this.node);
+        var tail = cc.find("tail",this.node);
 
+        var self = this;
         var skinid = storage.getStorage(storage.skinid);
-        player.getComponent(cc.Sprite).spriteFrame = res.loads["images_player_"+skinid];
-        this.node.setContentSize(player.getContentSize());
+        res.setSpriteFrame("images/player/player_"+skinid,player,function(){
+            self.node.setContentSize(player.getContentSize());
+            if(callback) callback();
+        });
 
         var gunid = storage.getStorage(storage.gunid);
-        gun.getComponent(cc.Sprite).spriteFrame = res.loads["images_gun_"+gunid];
+        this.gunid = gunid;
+        res.setSpriteFrame("images/gun/gun_"+gunid,gun);
         gun.setAnchorPoint(config.gunConf[gunid-1].anchor);
 
         aim.position = config.gunConf[gunid-1].aim;
+
+        tail.active = false;
+        res.setTexture("images/player/player_"+skinid,function(texture){
+            tail.getComponent(cc.MotionStreak).texture = texture;
+            var rec = new cc.SpriteFrame(texture).getRect();
+            tail.getComponent(cc.MotionStreak).stroke = rec.width*0.8;
+            tail.active = true;
+            tail.y = -rec.height/2*0.9;
+        });
     }
 
     jump(toPos,dir){
@@ -47,10 +63,10 @@ export  class player extends cc.Component {
 
         cc.tween(this.node)
         .then(cc.spawn(cc.jumpTo(time,toPos,h*2,1),cc.rotateBy(time,ang)))
-        .to(0.2, { scaleX: dir%2==1?-1:1 }, { easing: 'sineIn'})
         .call(() => { 
-            
+            gg.audio.playSound('audio/foot_1');
         })
+        .to(0.2, { scaleX: dir%2==1?-1:1 }, { easing: 'sineIn'})
         .start();
 
         this.scheduleOnce(function(){
@@ -90,6 +106,15 @@ export  class player extends cc.Component {
         .then(cc.spawn(cc.jumpTo(0.5,toPos,300,1),cc.rotateBy(0.5,ang)))
         .removeSelf()
         .start();
+
+        var bigblood = res.getObjByPool("prefab_anim_bigblood");
+        bigblood.position = this.node.position;
+        bigblood.scaleX = -this.node.scaleX;
+        this.game.gameMap.addChild(bigblood,9999);
+        bigblood.getComponent(cc.ParticleSystem).startColor = cc.color(255,20,20);
+        bigblood.getComponent(cc.ParticleSystem).endColor = cc.color(255,20,20);
+
+        gg.audio.playSound('audio/ricco_'+(Math.floor(Math.random()*2+1)));
     }
 
     fire(){
@@ -101,6 +126,7 @@ export  class player extends cc.Component {
         var bulletPos = p2;
         var time = 0.02;
         var enemy = null;
+        var isHead = false;
         if(results)
         {
             for(var i=0;i<results.length;i++)
@@ -110,6 +136,7 @@ export  class player extends cc.Component {
                 {
                     enemy = node.parent.getComponent("enemy");
                     bulletPos = results[i].point;
+                    isHead = node.name == "head" ? true : false;
                 }
                 else if(node.name == "platform" || node.name == "floor")
                 {
@@ -127,8 +154,13 @@ export  class player extends cc.Component {
         .call(()=>{
             if(cc.director.getScheduler().getTimeScale()<0.5)
             cc.director.getScheduler().setTimeScale(0.5);
-            if(enemy) enemy.die(bullet.position);
-            else this.die();
+            if(enemy) 
+            {
+                enemy.die(bullet.position,isHead);
+            }
+            else{
+                this.die();
+            }
         })
         .delay(time/2)
         .removeSelf()
@@ -138,7 +170,20 @@ export  class player extends cc.Component {
         {
             this.game.enemySc.fire(time);
             this.game.toOver();
+            this.game.cameraAni();
         }
+
+        //特效
+        var smoke = res.getObjByPool("prefab_anim_smoke");
+        smoke.position = bullet.position;
+        this.game.gameMap.addChild(smoke,9999);
+
+        var shell = res.getObjByPool("prefab_anim_shell");
+        shell.position = bullet.position;
+        this.game.gameMap.addChild(shell,9999);
+
+
+        gg.audio.playSound('audio/gun_'+this.gunid);
     }
 
     nofire(){

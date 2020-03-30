@@ -4,7 +4,7 @@ var gg = window["gg"];
 export const res = {
     
     loads:{},
-    audio_music: "audio/bgm",
+    audio_music: "audio/bg_1",
     audio_button: "audio/button",
     audio_coin: "audio/coin",
     nodePools: {},
@@ -47,6 +47,16 @@ export const res = {
                 sp.getComponent(cc.Sprite).spriteFrame = atlas.getSpriteFrame(url);
             }
 
+        });
+    },
+
+    setTexture: function(url,callback?:any)
+    {
+        cc.loader.loadRes(url, cc.Texture2D, function (err, texture) {
+            if(!err)
+            {
+                if(callback) callback(texture);
+            }
         });
     },
 

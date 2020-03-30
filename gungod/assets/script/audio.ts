@@ -15,7 +15,7 @@ export const audio = {
             {
                 if(!err)
                 {
-                    if(!yinliang) yinliang = 0.3;
+                    if(!yinliang) yinliang = 0.8;
                     cc.audioEngine.play(clip, true, yinliang);
                 }
                 else
@@ -48,7 +48,7 @@ export const audio = {
         if(gg.storage.getStorage(gg.storage.sound) == 1)
         {
             var now = new Date().getTime();
-            if(now-this.playSoundTime>20)
+            if(now-this.playSoundTime>=0)
             {
                 this.playSoundTime = now;
                 cc.loader.loadRes(sound, function (err, clip)

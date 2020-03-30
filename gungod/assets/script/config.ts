@@ -53,7 +53,44 @@ export const config = {
         {id:18,anchor:cc.v2(0.38,0.5), aim:cc.v2(77,-7)},
         {id:19,anchor:cc.v2(0.45,0.45), aim:cc.v2(64,-15)},
         {id:20,anchor:cc.v2(0.4,0.5), aim:cc.v2(38,-2)}
-    ],    
+    ], 
+    
+    enemyConf:[
+        {id:1,hv:cc.v2(0,20),hc:cc.size(48,28),bv:cc.v2(0,-15),bc:cc.size(58,40),color:cc.color(221,88,254)},
+        {id:2,hv:cc.v2(0,20),hc:cc.size(48,28),bv:cc.v2(0,-15),bc:cc.size(58,40),color:cc.color(120,56,251)},
+        {id:3,hv:cc.v2(0,20),hc:cc.size(48,28),bv:cc.v2(0,-15),bc:cc.size(58,40),color:cc.color(240,42,60)},
+        {id:4,hv:cc.v2(0,20),hc:cc.size(48,28),bv:cc.v2(0,-15),bc:cc.size(58,40),color:cc.color(157,251,56)},
+        {id:5,hv:cc.v2(0,20),hc:cc.size(48,28),bv:cc.v2(0,-15),bc:cc.size(58,40),color:cc.color(42,254,182)},
+        {id:6,hv:cc.v2(0,20),hc:cc.size(48,34),bv:cc.v2(0,-17),bc:cc.size(40,40),color:cc.color(42,254,182)},
+        {id:7,hv:cc.v2(0,20),hc:cc.size(48,34),bv:cc.v2(0,-17),bc:cc.size(40,40),color:cc.color(157,251,56)},
+        {id:8,hv:cc.v2(0,20),hc:cc.size(48,34),bv:cc.v2(0,-17),bc:cc.size(40,40),color:cc.color(240,42,60)},
+        {id:9,hv:cc.v2(0,20),hc:cc.size(48,34),bv:cc.v2(0,-17),bc:cc.size(40,40),color:cc.color(120,56,251)},
+        {id:10,hv:cc.v2(0,20),hc:cc.size(48,34),bv:cc.v2(0,-17),bc:cc.size(40,40),color:cc.color(221,88,254)},
+        {id:11,hv:cc.v2(0,33),hc:cc.size(28,22),bv:cc.v2(0,-12),bc:cc.size(28,64),color:cc.color(221,88,254)},
+        {id:12,hv:cc.v2(0,33),hc:cc.size(28,22),bv:cc.v2(0,-12),bc:cc.size(28,64),color:cc.color(120,56,251)},
+        {id:13,hv:cc.v2(0,33),hc:cc.size(28,22),bv:cc.v2(0,-12),bc:cc.size(28,64),color:cc.color(240,42,60)},
+        {id:14,hv:cc.v2(0,33),hc:cc.size(28,22),bv:cc.v2(0,-12),bc:cc.size(28,64),color:cc.color(157,251,56)},
+        {id:15,hv:cc.v2(0,33),hc:cc.size(28,22),bv:cc.v2(0,-12),bc:cc.size(28,64),color:cc.color(42,254,182)}
+    ],
+
+    bossConf:[
+        {id:1,hv:cc.v2(0,31),hc:cc.size(32,36),bv:cc.v2(0,-18),bc:cc.size(42,62),color:cc.color(221,88,254)},
+        {id:2,hv:cc.v2(0,33),hc:cc.size(34,36),bv:cc.v2(0,-20),bc:cc.size(60,68),color:cc.color(221,88,254)},
+        {id:3,hv:cc.v2(0,31),hc:cc.size(38,56),bv:cc.v2(0,-28),bc:cc.size(42,66),color:cc.color(221,88,254)},
+        {id:4,hv:cc.v2(5,23),hc:cc.size(40,50),bv:cc.v2(2,-25),bc:cc.size(38,50),color:cc.color(221,88,254)},
+        {id:5,hv:cc.v2(0,31),hc:cc.size(38,44),bv:cc.v2(0,-21),bc:cc.size(44,60),color:cc.color(221,88,254)},
+        {id:6,hv:cc.v2(0,31),hc:cc.size(46,50),bv:cc.v2(0,-26),bc:cc.size(46,60),color:cc.color(221,88,254)},
+        {id:7,hv:cc.v2(0,25),hc:cc.size(40,30),bv:cc.v2(0,-19),bc:cc.size(58,58),color:cc.color(221,88,254)},
+        {id:8,hv:cc.v2(0,23),hc:cc.size(44,30),bv:cc.v2(0,-15),bc:cc.size(88,46),color:cc.color(221,88,254)},
+        {id:9,hv:cc.v2(0,27),hc:cc.size(40,40),bv:cc.v2(0,-21),bc:cc.size(46,54),color:cc.color(221,88,254)},
+        {id:10,hv:cc.v2(0,27),hc:cc.size(40,40),bv:cc.v2(0,-24),bc:cc.size(50,60),color:cc.color(221,88,254)},
+        {id:11,hv:cc.v2(5,37),hc:cc.size(42,42),bv:cc.v2(5,-21),bc:cc.size(40,70),color:cc.color(221,88,254)},
+        {id:12,hv:cc.v2(0,39),hc:cc.size(30,40),bv:cc.v2(0,-17),bc:cc.size(40,74),color:cc.color(221,88,254)},
+        {id:13,hv:cc.v2(0,32),hc:cc.size(30,32),bv:cc.v2(0,-14),bc:cc.size(74,64),color:cc.color(221,88,254)},
+        {id:14,hv:cc.v2(0,16),hc:cc.size(44,40),bv:cc.v2(0,-21),bc:cc.size(62,34),color:cc.color(221,88,254)},
+        {id:15,hv:cc.v2(0,42),hc:cc.size(36,36),bv:cc.v2(0,-17),bc:cc.size(26,82),color:cc.color(221,88,254)},
+        {id:16,hv:cc.v2(0,30),hc:cc.size(42,34),bv:cc.v2(-2,-16),bc:cc.size(24,60),color:cc.color(221,88,254)}
+    ],
 
     levels:[
         {id:1,floor:2},
