@@ -18,8 +18,18 @@ export default class game extends cc.Component {
     gameNode: cc.Node = null;
     @property(cc.Node)
     gameMap: cc.Node = null;
+    @property(cc.Node)
+    uiNode: cc.Node = null;
+    @property(cc.Node)
+    bossNode: cc.Node = null;
     @property(cc.Label)
     coinLabel: cc.Label = null;
+    @property(cc.Label)
+    lvLabel: cc.Label = null;
+    @property(cc.Label)
+    hitenemyLabel: cc.Label = null;
+    @property(cc.Label)
+    hitheadLabel: cc.Label = null;
     @property(cc.Node)
     startLabel: cc.Node = null;
    
@@ -34,7 +44,16 @@ export default class game extends cc.Component {
     
     playerSc = null;
     enemySc = null;
-    levelConf = config.levels[0];
+    public level = 1;
+    levelConf = {id:1,floor:2,bosshp:4};
+    currCoin = 0;
+    hitEnemy = 0;
+    hitHead = 0;
+    isFuhuo = false;
+
+    fuhuoData = {pos:cc.v2(),scaleX:1};
+
+    coinPos = null;
     
     onLoad () {
         this.initPhysics();
@@ -43,6 +62,14 @@ export default class game extends cc.Component {
     }
 
     start () {
+        if(!this.coinPos)
+        {
+            this.scheduleOnce(function(){
+                var coinNode = this.coinLabel.node.parent;
+                var pos = coinNode.parent.convertToWorldSpaceAR(coinNode.position);
+                this.coinPos = pos.sub(cc.v2(cc.winSize.width/2,cc.winSize.height/2));
+            },0.1);
+        }
        this.initGame();
        gg.audio.playMusic(res.audio_music,0.5);
     }
@@ -99,23 +126,92 @@ export default class game extends cc.Component {
 
     }
 
+    addCoin(num,pos,isHead){
+        pos = pos.sub(this.camera.node.position);
+        if(isHead) num*=2;
+        for(var i=0;i<num;i++)
+        {
+            var node = new cc.Node();
+            node.addComponent(cc.Sprite);
+            this.uiNode.addChild(node);
+            res.setSpriteFrame("images/common/coin",node);
+            node.scale = 0.8;
+            node.x = pos.x;
+            node.y = pos.y-cc.winSize.height/2;
+            cc.tween(node)
+            .to(0.3,{position:cc.v2(node.x+(Math.random()-0.5)*300,node.y+(Math.random()-0.5)*300)},{easing:"sineOut"})
+            .to(0.5+0.05*num,{position:this.coinPos},{easing:"sineIn"})
+            .call(()=>{
+                this.currCoin++;
+                this.coinLabel.string = ""+this.currCoin;
+            })
+            .removeSelf()
+            .start();
+        }
+        gg.audio.playSound(gg.res.audio_coin);
+    }
+
+    addHitEnemy(num){
+        this.hitEnemy += num;
+        this.hitenemyLabel.string = this.hitEnemy+"";
+    }
+
+    addHitHead(num){
+        this.hitHead += num;
+        if(num==0) this.hitHead = 0;
+        this.hitheadLabel.string = this.hitHead+"";
+    }
+
     initGame(){
         this.maps = [];
-        this.bgcolor = config.bgcolor[Math.floor(Math.random()*config.bgcolor.length)];
         this.platformZindex = 9999;
         this.gameState = "stop";
         this.currFloor = 0;
         this.canNextFloor = true;
         this.isBoss = false;
-        this.levelConf = config.levels[0];
+        this.isFuhuo = false;
+        this.level = storage.getStorage(storage.level);
+        // var level = this.level<=config.levels.length ? this.level : config.levels.length;
+        // this.levelConf = config.levels[level-1];
+        this.levelConf.id = this.level;
+        this.levelConf.floor = this.level+1 > 10 ? 10 : this.level+1;
+        this.levelConf.bosshp = this.level+5 > 100 ? 100 : this.level+5;
+        this.bgcolor = config.bgcolor[(this.level-1)%config.bgcolor.length];
 
-        this.startLabel.active = true;
+        this.currCoin = 0;
+        this.hitEnemy = 0;
+        this.hitHead = 0;
+        this.coinLabel.string = "0";
+        this.lvLabel.string = "第 "+this.level+" 关";
+        this.addHitEnemy(0);
+        this.addHitHead(0);
+
+        // this.startLabel.active = true;
+        this.bossNode.active = false;
+        this.camera.node.stopAllActions();
         this.camera.node.y = 0;
         this.gameMap.destroyAllChildren();
         this.initData();
         this.initMap();
         this.initPlayer();
+        this.enemySc = null;
         cc.director.getScheduler().setTimeScale(1);
+
+        this.scheduleOnce(function(){
+            this.gameState = "start";
+            this.camera.node.y = 0;
+            var hasgun = storage.getStorage(storage.hasgun);
+            if(this.level>1 && (storage.indexOf(hasgun,5) == -1 || storage.indexOf(hasgun,7) == -1))
+            {
+                var self = this;
+                res.openUI("shiyong",null,function(){
+                    self.playerSc.resetZb();
+                    self.startGame();
+                });
+            }
+            else
+            this.startGame();
+        },1)
     }
 
     initMap(){
@@ -134,6 +230,10 @@ export default class game extends cc.Component {
         platform.color = this.bgcolor;
 
         var floornum = Math.floor(Math.random()*4)+3;
+        if(this.level == 1 && platformnum == 0)
+        {
+            floornum = 4;
+        }
         platform["floornum"] = floornum;
         platform["floor"] = [];
         platform["wujian"] = null;
@@ -168,6 +268,7 @@ export default class game extends cc.Component {
         }
         else
         {
+            platform.height = 400;
             platform.y = platform.height/2;
         }
 
@@ -281,9 +382,9 @@ export default class game extends cc.Component {
     }
 
     createEnemys(platform){
-        if(this.isBoss)
+        if(this.enemySc && !this.enemySc.isDie)
         {
-            this.bossJump(platform);
+            this.enemyJump(platform);
             return;
         }
         var floornum = platform["floornum"];
@@ -292,6 +393,10 @@ export default class game extends cc.Component {
             this.isBoss = true;
         }
         var fn = Math.floor(Math.random()*floornum);
+        if(this.level == 1 && this.currFloor == 0)
+        {
+            fn = 0;
+        }
         this.createEnemy(platform,fn);
     }
 
@@ -303,9 +408,22 @@ export default class game extends cc.Component {
         this.enemySc = enemyNode.getComponent(enemy);
 
         var enemyId = Math.floor(Math.random()*config.enemyConf.length+1);
-        if(this.isBoss) enemyId = Math.floor(Math.random()*config.bossConf.length+1);
+        if(this.isBoss) 
+        {
+            // enemyId = Math.floor(Math.random()*config.bossConf.length+1);
+            enemyId = this.level%config.bossConf.length;
+            if(enemyId == 0)enemyId = config.bossConf.length;
+
+            this.bossNode.active = true;
+            cc.tween(this.bossNode)
+            .then(cc.blink(1,5))
+            .call(()=>{
+                this.bossNode.active = false;
+            })
+            .start();
+        }
         var self = this;
-        this.enemySc.initConf(this.isBoss,enemyId,function(){
+        this.enemySc.initConf(this.isBoss,enemyId,this.levelConf.bosshp,function(){
 
             var tarx = 50*floornum + (platform.width/2-50*floornum)/2-25;
             if(self.currFloor%2==0) tarx = -tarx;
@@ -340,16 +458,19 @@ export default class game extends cc.Component {
         
         var y = platform.height/2+50*floornum + platform.y + this.playerSc.node.height/2;
         this.playerSc.jump(cc.v2(x,y),this.currFloor);
+
+        this.fuhuoData.pos = this.playerSc.node.position;
+        this.fuhuoData.scaleX = this.playerSc.node.scaleX;
     }
 
-    bossJump(platform){
+    enemyJump(platform){
         var floornum = platform["floornum"];
         var fn = Math.floor(Math.random()*floornum);
         var x =  50*floornum-25 - 50*fn;// (50*floornum + (platform.width/2-50*floornum)/2)-25 + 50*fn;
         if(this.currFloor%2==0) x = -x;
         
         var y = platform.height/2+50*floornum + platform.y + this.enemySc.node.height/2 - 50*fn;
-        this.enemySc.bossjump(cc.v2(x,y),this.currFloor);
+        this.enemySc.jump2(cc.v2(x,y),this.currFloor);
     }
 
     nextFloor(){
@@ -380,12 +501,62 @@ export default class game extends cc.Component {
 
     toOver(){
         this.gameState = "over";
-        this.scheduleOnce(this.initGame.bind(this),1);
+        this.scheduleOnce(function(){
+            this.enemySc.winAni();
+        },1);
+
+        this.scheduleOnce(function(){
+            if(this.isFuhuo) this.gameOver();
+            else  res.openUI("fuhuo"); 
+        },3);
+        if(this.isFuhuo)
+        storage.setStorage(storage.sygunid,0);
     }
 
     toWin(){
         this.gameState = "over";
-        this.scheduleOnce(this.initGame.bind(this),1);
+        
+        storage.setStorage(storage.level,this.level+1);
+        storage.uploadStorage(storage.level);
+
+        this.scheduleOnce(function(){
+            this.playerSc.winAni();
+        },1);
+
+        this.scheduleOnce(function(){
+            res.openUI("win",null,this.currCoin);
+        },3);
+        storage.setStorage(storage.sygunid,0);
+    }
+
+    nextLevel(){
+        this.scheduleOnce(this.initGame.bind(this),0.05);
+    }
+
+    toFuhuo(){
+        var self = this;
+        var playerNode = cc.instantiate(res.loads["prefab_game_player"]);
+        this.gameMap.addChild(playerNode,9999);
+        this.playerSc = playerNode.getComponent(player);
+        this.playerSc.initConf(function(){
+            playerNode.position = self.fuhuoData.pos;
+            playerNode.scaleX = self.fuhuoData.scaleX;
+        });
+
+        this.scheduleOnce(this.playerJump.bind(this),1);
+        this.gameState = "start";
+        this.isFuhuo = true;
+    }
+
+    toFangqiFuhuo(){
+        this.scheduleOnce(function(){
+            this.gameOver();
+        },0.2);
+        storage.setStorage(storage.sygunid,0);
+    }
+
+    gameOver(){
+        res.openUI("fail",null,this.currCoin);
     }
    
     touchDown(pos){
@@ -400,11 +571,11 @@ export default class game extends cc.Component {
     }
 
     touchUp(pos){
-        if(this.gameState == "stop")
-        {
-            this.gameState = "start";
-            this.startGame();
-        }
+        // if(this.gameState == "stop")
+        // {
+        //     this.gameState = "start";
+        //     this.startGame();
+        // }
     }
 
     cameraAni(){

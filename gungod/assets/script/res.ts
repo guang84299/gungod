@@ -95,7 +95,7 @@ export const res = {
             var node = new cc.Node();
             node.addComponent(cc.Sprite);
             cc.find("Canvas").addChild(node,10000);
-            this.setSpriteFrame("images/common/icon_huobi_jinbi",node);
+            this.setSpriteFrame("images/common/coin",node);
             node.x = (Math.random()-0.5)*300;
             node.y = (Math.random()-0.5)*300;
             node.runAction(cc.sequence(

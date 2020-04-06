@@ -1,3 +1,5 @@
+import { config } from "./config";
+
 const {ccclass, property} = cc._decorator;
 var gg = window["gg"];
 var wx = window["wx"];
@@ -78,10 +80,11 @@ export const qianqista = {
                 if(self.sharecallback)
                 {
                     var t = new Date().getTime();
-                    if(self.sharetime && t - self.sharetime > 3000)//&& self.sharenum>=1
+                    if(self.sharetime && t - self.sharetime > 3000 && gg.GAME.shareNum>0)//&& self.sharenum>=1
                     {
                         self.sharecallback(true);
                         self.sharenum++;
+                        gg.GAME.shareNum --;
                     }
                     else
                     {
@@ -393,11 +396,13 @@ export const qianqista = {
         var self = this;
         if(wx)
         {
+            var path = "jscode2session";
+            if(config.isQQ()) path = "jscode2sessionqq";
             wx.login({
                 success: function(res)
                 {
                     console.log('login:', res);
-                    self.sendRequest("jscode2sessionqq",{gameId:self.gameId,gameSecret:self.secret,jsCode:res.code},function(r){
+                    self.sendRequest(path,{gameId:self.gameId,gameSecret:self.secret,jsCode:res.code},function(r){
                         if(r.state == 200)
                         {
                             var msg = JSON.parse(r.msg);
@@ -427,7 +432,9 @@ export const qianqista = {
             var self = this;
             if(wx)
             {
-                self.httpPost("groupidqq",{encryptedData:encryptedData,sessionkey:self.session_key,iv:iv},function(r){
+                var path = "groupid";
+                if(config.isQQ()) path = "groupidqq";
+                self.httpPost(path,{encryptedData:encryptedData,sessionkey:self.session_key,iv:iv},function(r){
                     if(r.state == 200)
                     {
                         var msg = r.data;

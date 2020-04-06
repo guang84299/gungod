@@ -16,7 +16,8 @@ gg.qianqista = qianqista;
 gg.audio = audio;
 gg.config = config;
 gg.GAME = {};
-gg.GAME.judgeLixian = true;
+gg.GAME.isFirstOpen = true;
+gg.GAME.shareNum = 6;
 
 
 @ccclass
@@ -53,7 +54,7 @@ export default class loading extends cc.Component {
         // cc.game.setFrameRate(30);
         var self = this;
 
-        qianqista.init(config.getGameId(),config.getSecret(),"测试",function(){
+        qianqista.init(config.getGameId(),config.getSecret(),config.getGameName(),function(){
             // var score = storage.getStorage(storage.lv);
             // sdk.uploadScore(score,self.initNet.bind(self));
             self.initNet();
@@ -128,7 +129,10 @@ export default class loading extends cc.Component {
             "prefab/anim/blood",
             "prefab/anim/bigblood",
            
-            // "prefab/ui/toast"
+            "prefab/ui/gun",
+            "prefab/ui/skin",
+
+            "prefab/ui/toast"
         ];
         // for(var i=1;i<=20;i++)
         // {
@@ -267,7 +271,7 @@ export default class loading extends cc.Component {
             cc.log(res.loads);
             // res.openUI("juqing");
             // if(this.isFirstOpen) res.openUI("juqing");
-            cc.director.loadScene("game");
+            cc.director.loadScene("main");
             
         }
     }
@@ -383,78 +387,49 @@ export default class loading extends cc.Component {
             // if(datas.hasOwnProperty("first"))
             //     storage.setStorage(storage.first);
             if(datas.hasOwnProperty("coin"))
-            {
-                var coin = Number(datas.coin);
-                var coin2 = storage.getStorage(storage.coin);
-                if(coin2>coin) coin = coin2;
-                storage.setStorage(storage.coin,coin);
-            }
+                storage.setStorage(storage.coin,Number(datas.coin));
 
-            // if(datas.hasOwnProperty("gold"))
-            //     storage.setStorage(storage.gold, Number(datas.gold)); 
+            if(datas.hasOwnProperty("skinid"))
+                storage.setStorage(storage.skinid, Number(datas.skinid)); 
 
-            // if(datas.hasOwnProperty("hasrole"))
-            //     storage.setStorage(storage.hasrole, datas.hasrole);  
+            if(datas.hasOwnProperty("hasskin"))
+                storage.setStorage(storage.hasskin, datas.hasskin);  
 
-            // if(datas.hasOwnProperty("chaozuoid"))
-            //     storage.setStorage(storage.chaozuoid, datas.chaozuoid);
+            if(datas.hasOwnProperty("gunid"))
+                storage.setStorage(storage.gunid, Number(datas.gunid));
 
-            // if(datas.hasOwnProperty("tiaozhanid"))
-            //     storage.setStorage(storage.tiaozhanid, Number(datas.tiaozhanid));
+            if(datas.hasOwnProperty("hasgun"))
+                storage.setStorage(storage.hasgun, datas.hasgun);
 
-            // if(datas.hasOwnProperty("fuli"))
-            //     storage.setStorage(storage.fuli, datas.fuli);
+            if(datas.hasOwnProperty("level"))
+                storage.setStorage(storage.level, Number(datas.level));    
 
-            // if(datas.hasOwnProperty("laodianrate"))
-            //     storage.setStorage(storage.laodianrate, Number(datas.laodianrate));    
-
-            // if(datas.hasOwnProperty("guiziid"))
-            //     storage.setStorage(storage.guiziid, datas.guiziid);    
-
-            // if(datas.hasOwnProperty("onlinetime"))
-            //     storage.setStorage(storage.onlinetime, Number(datas.onlinetime)); 
-            
-            // if(datas.hasOwnProperty("bankanum"))
-            //     storage.setStorage(storage.bankanum, Number(datas.bankanum)); 
+            if(datas.hasOwnProperty("gunlock"))
+                storage.setStorage(storage.gunlock, datas.gunlock);  
                 
-            // if(datas.hasOwnProperty("bankatime"))
-            //     storage.setStorage(storage.bankatime, Number(datas.bankatime)); 
+            if(datas.hasOwnProperty("skinlock"))
+                storage.setStorage(storage.skinlock, datas.skinlock);        
+
+            if(datas.hasOwnProperty("onlinetime"))
+                storage.setStorage(storage.onlinetime, Number(datas.onlinetime)); 
+            
+            if(datas.hasOwnProperty("qiandaotag"))
+                storage.setStorage(storage.qiandaotag, Number(datas.qiandaotag)); 
+                
+            if(datas.hasOwnProperty("hitenemy"))
+                storage.setStorage(storage.hitenemy, Number(datas.hitenemy)); 
                
-            // if(datas.hasOwnProperty("bankarate"))
-            //     storage.setStorage(storage.bankarate, Number(datas.bankarate));   
+            if(datas.hasOwnProperty("hithead"))
+                storage.setStorage(storage.hithead, Number(datas.hithead));   
             
-            // if(datas.hasOwnProperty("bankalastsa"))
-            //     storage.setStorage(storage.bankalastsa, Number(datas.bankalastsa));   
+            if(datas.hasOwnProperty("hitboss"))
+                storage.setStorage(storage.hitboss, Number(datas.hitboss));   
 
-            // if(datas.hasOwnProperty("videonum"))
-            //     storage.setStorage(storage.videonum, Number(datas.videonum));  
+            if(datas.hasOwnProperty("taskdata"))
+                storage.setStorage(storage.taskdata, datas.taskdata);  
 
-            // if(datas.hasOwnProperty("totalcoin"))
-            //     storage.setStorage(storage.totalcoin, Number(datas.totalcoin));  
-
-            // if(datas.hasOwnProperty("cainum"))
-            //     storage.setStorage(storage.cainum, Number(datas.cainum));  
-
-            // if(datas.hasOwnProperty("jingying"))
-            //     storage.setStorage(storage.jingying, datas.jingying);  
-                
-            // if(datas.hasOwnProperty("renwuid"))
-            //     storage.setStorage(storage.renwuid, datas.renwuid);    
-                
-            // if(datas.hasOwnProperty("shipin"))
-            //     storage.setStorage(storage.shipin, datas.shipin);   
-                
-            // if(datas.hasOwnProperty("baoliao"))
-            //     storage.setStorage(storage.baoliao, datas.baoliao); 
-                
-            // if(datas.hasOwnProperty("tucao"))
-            //     storage.setStorage(storage.tucao, datas.tucao);
-
-            // if(datas.hasOwnProperty("shengzhi"))
-            //     storage.setStorage(storage.shengzhi, datas.shengzhi);
-
-            // if(datas.hasOwnProperty("shouyix2"))
-            //     storage.setStorage(storage.shouyix2, datas.shouyix2);
+            if(datas.hasOwnProperty("sygunid"))
+                storage.setStorage(storage.sygunid, Number(datas.sygunid));  
 
             if(datas.hasOwnProperty("loginday"))
                 storage.setStorage(storage.loginday, Number(datas.loginday));    
@@ -470,19 +445,28 @@ export default class loading extends cc.Component {
             var t2 = storage.getStorage(storage.logintime);
             if(storage.isResetDay(t1,t2))
             {
+                gg.GAME.shareNum = 6;
                 var loginday = storage.getStorage(storage.loginday);
-                storage.setStorage(storage.loginday, loginday+1);   
-                // storage.setStorage(storage.fuli, []);   
-                // storage.setStorage(storage.cainum,2);
-                // storage.setStorage(storage.renwuid, []); 
-                // storage.setStorage(storage.baoliao, {});
-                // storage.setStorage(storage.shipinnum,0);
+                storage.setStorage(storage.loginday, loginday+1);  
+
+                storage.setStorage(storage.hitenemy, 0); 
+                storage.setStorage(storage.hithead, 0);   
+                storage.setStorage(storage.hitboss, 0);     
+                storage.setStorage(storage.taskdata, {}); 
+                
             }
             console.log("datas:",datas);
         }
         else
         {
-             
+            gg.GAME.shareNum = 6;
+            var loginday = storage.getStorage(storage.loginday);
+            storage.setStorage(storage.loginday, loginday+1);  
+
+            storage.setStorage(storage.hitenemy, 0); 
+            storage.setStorage(storage.hithead, 0);   
+            storage.setStorage(storage.hitboss, 0);     
+            storage.setStorage(storage.taskdata, {}); 
         }
     }
     // update (deltaTime: number) {

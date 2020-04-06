@@ -129,7 +129,7 @@ export const sdk = {
         var self = this;
         if(window["wx"])
         {
-            this.rewardedVideoAd = wx.createRewardedVideoAd({ adUnitId:'89868ad4602752e65328230e3ce95ba8'});
+            this.rewardedVideoAd = wx.createRewardedVideoAd({ adUnitId:'adunit-506949787fc773c5'});
             this.rewardedVideoAd.onLoad(function(){
                 gg.GAME.hasVideo = true;
                 console.log('激励视频 广告加载成功')
@@ -237,7 +237,7 @@ export const sdk = {
             var s = cc.view.getFrameSize();
             var dpi = cc.winSize.width/s.width;
 
-            var w = s.width*0.8;
+            var w = s.width*0.9;
 
             var isMoveAd = true;
             var self = this;
@@ -257,7 +257,7 @@ export const sdk = {
             }
 
             this.bannerAd = wx.createBannerAd({
-                adUnitId: '1649fcdfa8f1f21468eac87604b8c91e',
+                adUnitId: 'adunit-c5b2e0e80388172e',
                 style: {
                     left: 0,
                     top: s.height/dpi-300/3.5,

@@ -2,6 +2,7 @@
 const {ccclass, property} = cc._decorator;
 import { storage } from "./storage";
 import { res } from "./res";
+import { config } from "./config";
 var gg = window["gg"];
 
 @ccclass
@@ -9,6 +10,10 @@ export default class main extends cc.Component {
 
     @property(cc.Label)
     coinLabel: cc.Label = null;
+    @property(cc.Label)
+    lvLabel: cc.Label = null;
+    @property(cc.Node)
+    startBtn: cc.Node = null;
    
     onlineTime = 0;
 
@@ -16,32 +21,44 @@ export default class main extends cc.Component {
 
     coinPos = null;
 
+    currLevel = 1;
+    currCoin = 0;
+
     onLoad () {
         this.initData();
     }
 
     start () {
-        this.updateCoin();
         this.scheduleOnce(this.updateBtn.bind(this),0.2);
 
-        //更新离线
-        var lixiantime = storage.getStorage(storage.logintime);
-        var now = new Date().getTime();
-        if(now - lixiantime>60*1000)
-        res.openUI("lixian");
-        this.onlineTime = now;
+        cc.tween(this.startBtn)
+        .by(0.5,{scale:0.3},{easing:"sineIn"})
+        .by(0.5,{scale:-0.3},{easing:"sineIn"})
+        .union().repeatForever().start();
 
-        //适配刘海屏
-        if(gg.sdk.is_iphonex())
+        //签到
+        if(gg.GAME.isFirstOpen)
         {
-            var topNode = cc.find("topNode",this.node);
-            topNode.height += 30;
-            topNode.getComponent(cc.Widget).updateAlignment();
-            for(var i=0;i<topNode.children.length;i++)
+            gg.GAME.isFirstOpen = false;
+            var qiandaotag = storage.getStorage(storage.qiandaotag);
+            if(qiandaotag<7)
             {
-                topNode.children[i].y -= 15;
-            }           
+                var loginday = storage.getStorage(storage.loginday);
+                if(qiandaotag<loginday)res.openUI("qiandao");
+            }
         }
+       
+        //适配刘海屏
+        // if(gg.sdk.is_iphonex())
+        // {
+        //     var topNode = cc.find("topNode",this.node);
+        //     topNode.height += 30;
+        //     topNode.getComponent(cc.Widget).updateAlignment();
+        //     for(var i=0;i<topNode.children.length;i++)
+        //     {
+        //         topNode.children[i].y -= 15;
+        //     }           
+        // }
 
         var yindao = storage.getStorage(storage.yindao);
         if(yindao==1){
@@ -55,37 +72,36 @@ export default class main extends cc.Component {
 
         if(!this.coinPos)
         {
-            var coinNode = cc.find("topNode/coinbg",this.node);
-            var pos = coinNode.parent.convertToWorldSpaceAR(coinNode.position);
-            this.coinPos = pos.sub(cc.v2(cc.winSize.width/2,cc.winSize.height/2));
+            this.scheduleOnce(function(){
+                var coinNode = cc.find("coinbg",this.node);
+                var pos = coinNode.parent.convertToWorldSpaceAR(coinNode.position);
+                this.coinPos = pos.sub(cc.v2(cc.winSize.width/2,cc.winSize.height/2));
+            },0.1);
         }
 
-
+        this.currLevel = storage.getStorage(storage.level);
+        
+        this.lvLabel.string = "当前关卡："+this.currLevel;
+        this.updateCoin();
+        this.updateRed();
         gg.sdk.aldSendEvent("进入游戏界面");
+
+        gg.sdk.showBanner();
     }
 
     initData(){
-        gg.coin = storage.getStorage(storage.coin);
+       
     }
 
    
     updateCoin(){
-        this.coinLabel.string = storage.castNum(gg.coin);
+        this.currCoin = storage.getStorage(storage.coin);
+        this.coinLabel.string = storage.castNum(this.currCoin);
     }
 
    
-    addCoin(num,isOther:any){
-        gg.coin += num;
-
-        if(isOther)
-        {
-            var totalcoin = storage.getStorage(storage.totalcoin);
-            storage.setStorage(storage.totalcoin,totalcoin+num);
-           
-            if(num>0)
-            gg.res.showCoinAni(this.coinPos);
-        }
-        
+    updateCoinAni(){
+        gg.res.showCoinAni(this.coinPos);
         this.updateCoin();
     }
 
@@ -100,14 +116,40 @@ export default class main extends cc.Component {
 
     //更新小红点
     updateRed(){
-        //炒作
-        cc.find("bottomNode/chaozuo/red",this.node).active = this.isRedchaozuo();
+        //枪
+        cc.find("gun/red",this.node).active = this.isRedGun();
+        //skin
+        cc.find("skin/red",this.node).active = this.isRedSkin();
+        //签到
+        cc.find("qiandao/red",this.node).active = this.isRedQiandao();
+        //任务
+        cc.find("task/red",this.node).active = this.isRedTask();
     }
 
     click(event,data){
-        if(data == "chaozuo")
+        if(data == "setting")
         {
-            res.openUI("chaozuo");
+            res.openUI("setting");
+        }
+        else if(data == "gun")
+        {
+            res.openUI("gun");
+        }
+        else if(data == "skin")
+        {
+            res.openUI("skin");
+        }
+        else if(data == "qiandao")
+        {
+            res.openUI("qiandao");
+        }
+        else if(data == "task")
+        {
+            res.openUI("task");
+        }
+        else if(data == "start")
+        {
+            cc.director.loadScene("game");
         }
         
         gg.audio.playSound(gg.res.audio_button);
@@ -120,11 +162,75 @@ export default class main extends cc.Component {
        
     }
 
-    isRedchaozuo(){
-        var chaozuoid = storage.getStorage(storage.chaozuoid);
-       
+    isRedGun(){        
         var isRed = false;
+        var hasgun = storage.getStorage(storage.hasgun);
+        for(var i=0;i<config.gunConf.length;i++)
+        {
+            if(this.currCoin>=config.gunConf[i].unlockcost 
+                && this.currLevel>=config.gunConf[i].unlocklv
+                && storage.indexOf(hasgun,i+1) == -1)
+               {
+                    isRed = true;
+                    break;
+               } 
+        }
         
+        return isRed;
+    }
+
+    isRedSkin(){
+        var isRed = false;
+        var hasskin = storage.getStorage(storage.hasskin);
+        for(var i=0;i<config.playerConf.length;i++)
+        {
+            if(this.currCoin>=config.playerConf[i].unlockcost 
+                && this.currLevel>=config.playerConf[i].unlocklv
+                && storage.indexOf(hasskin,i+1) == -1)
+               {
+                    isRed = true;
+                    break;
+               } 
+        }
+        
+        return isRed;
+    }
+
+    isRedQiandao(){
+        var isRed = false;
+        var qiandaotag = storage.getStorage(storage.qiandaotag);
+        if(qiandaotag<7)
+        {
+            var loginday = storage.getStorage(storage.loginday);
+            if(qiandaotag<loginday) isRed = true;
+        }
+        return isRed;
+    }
+
+    isRedTask(){
+        var hitenemy = storage.getStorage(storage.hitenemy);
+        var hithead = storage.getStorage(storage.hithead);
+        var hitboss = storage.getStorage(storage.hitboss);
+        var isRed = false;
+        for(var i=0;i<config.tasks.length;i++)
+        {
+            var taskitem = config.tasks[i];
+            var taskdata = storage.getStorage(storage.taskdata);
+            var adNum = taskdata[""+taskitem.id] ? taskdata[""+taskitem.id] : 0;
+            if(adNum == 0)
+            {
+                var wnum = 0;
+                if(taskitem.type==1) wnum = hitenemy;
+                else if(taskitem.type==2) wnum = hithead;
+                else if(taskitem.type==3) wnum = hitboss;
+                
+                if(wnum>=taskitem.num)
+                {
+                    isRed = true;
+                    break;
+                }
+            }
+        }
         return isRed;
     }
 }

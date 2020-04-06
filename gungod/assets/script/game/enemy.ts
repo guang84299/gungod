@@ -2,6 +2,7 @@
 const {ccclass, property} = cc._decorator;
 import { res } from "../res";
 import { config } from "../config";
+import { sdk } from "../sdk";
 var gg = window["gg"];
 @ccclass
 export  class enemy extends cc.Component {
@@ -10,9 +11,12 @@ export  class enemy extends cc.Component {
     aimDraw = null;
     gun = null;
     tail = null;
+    hppro = null;
 
     isBoss = false;
-    hp = 15;
+    public isDie = false;
+    hp = 1;
+    maxhp = 1;
 
     conf = {color:cc.color(221,88,254)};
 
@@ -24,12 +28,17 @@ export  class enemy extends cc.Component {
         this.aimDraw.active = false;
         this.gun = cc.find("gun",this.node);
         this.tail = cc.find("tail",this.node);
-
+        this.hppro = cc.find("hp",this.node).getComponent(cc.ProgressBar);
+        this.hppro.progress = 1;
+        this.hppro.node.opacity = 0;
         this.setPhysics(false);
     }
 
-    initConf(isBoss,skinid,callback){
+    initConf(isBoss,skinid,bosshp,callback){
         this.isBoss = isBoss;
+        if(isBoss) this.hp = bosshp;
+        else this.hp = 1;
+        this.maxhp = this.hp;
         if(isBoss) this.conf = config.bossConf[skinid-1];
         else this.conf = config.enemyConf[skinid-1];
         var player = cc.find("player",this.node);
@@ -71,6 +80,7 @@ export  class enemy extends cc.Component {
                 if(this.isBoss)
                 {
                     this.game.cameraAni();
+                    sdk.vibrate(false);
                     gg.audio.playSound('audio/foot_boss_land');
                 }
                 else{
@@ -90,7 +100,7 @@ export  class enemy extends cc.Component {
         }
     }
 
-    bossjump(toPos,dir){
+    jump2(toPos,dir){
         this.setPhysics(false);
         var h = toPos.y - this.node.y;
         if(h>200) h = 200;
@@ -103,7 +113,12 @@ export  class enemy extends cc.Component {
         // .to(0.2, { scaleX: dir%2==1?-1:1 }, { easing: 'sineIn'})
         .call(() => { 
             this.game.cameraAni();
-            gg.audio.playSound('audio/foot_boss_land');
+            if(this.isBoss)
+            {
+                sdk.vibrate(false);
+                gg.audio.playSound('audio/foot_boss_land');
+            }
+            else   gg.audio.playSound('audio/foot_1');  
             this.node.scaleX = dir%2==1?-1:1;
             this.game.playerJump();
             this.setPhysics(true);
@@ -111,15 +126,43 @@ export  class enemy extends cc.Component {
         .start();
     }
 
-    die(pos,isHead){
-        var isDie = false;
+    winAni(){
+        cc.tween(this.node)
+        .then(cc.spawn(cc.jumpBy(1,cc.v2(0,0),300,1),cc.rotateBy(1,360)))
+        .call(() => { 
+            if(this.isBoss)
+            {
+                gg.audio.playSound('audio/foot_boss_land');
+            }
+            else{
+                gg.audio.playSound('audio/foot_1');
+            }
+            sdk.vibrate(false);
+        })
+        .union()
+        .repeat(2)
+        .start();
+
+        if(this.isBoss) gg.audio.playSound('audio/boss_xiao');
+        else gg.audio.playSound('audio/xiao');
+    }
+
+    die(pos,isHead,fire,coin){
+        if(this.isDie) return;
+        this.isDie = false;
         if(this.isBoss)
         {
-            this.hp -= 5;
+            this.hp -= fire;
+            this.hppro.progress = this.hp/this.maxhp;
+            this.hppro.node.opacity = 255;
+            this.hppro.node.stopAllActions();
+            cc.tween(this.hppro.node)
+            .then(cc.sequence(cc.delayTime(2),cc.fadeOut(0)))
+            .start();
+
             if(this.hp<=0) 
             {
-                isDie = true;                
-                this.game.toWin();
+                this.isDie = true;    
             }
             cc.tween(this.node)
                 .by(0.05, { position: cc.v2(-20,0)},{easing:"sineIn"})
@@ -129,9 +172,9 @@ export  class enemy extends cc.Component {
         }
         else
         {
-            isDie = true;   
+            this.isDie = true;   
         }
-        if(isDie)
+        if(this.isDie)
         {
             var dir = this.node.position.sub(pos).normalize();
             var toPos = this.node.position.add(dir.mul(cc.winSize.width/2));
@@ -141,6 +184,8 @@ export  class enemy extends cc.Component {
             .then(cc.spawn(cc.jumpTo(0.5,toPos,200,1),cc.rotateBy(0.5,ang)))
             .removeSelf()
             .start();
+
+            this.game.addHitEnemy(1);            
         }
 
         if(isHead)
@@ -154,6 +199,7 @@ export  class enemy extends cc.Component {
             bigblood.getComponent(cc.ParticleSystem).endColor = this.conf.color;
             
             gg.audio.playSound('audio/hit_head');
+            this.game.addHitHead(1);  
         }
         else
         {
@@ -165,6 +211,7 @@ export  class enemy extends cc.Component {
             blood.getComponent(cc.ParticleSystem).endColor = this.conf.color;
 
             gg.audio.playSound('audio/hit_torso');
+            // this.game.addHitHead(0);  
         }
 
         //添加击中特效
@@ -178,9 +225,25 @@ export  class enemy extends cc.Component {
         .to(0.1,{opacity:0},{easing:"sineIn"})
         .call(()=>{
             if(isHead) gg.audio.playSound('audio/hit_head_yuyin');
+            this.game.addCoin(coin,this.node.position,isHead);
         })
         .removeSelf()
         .start();
+
+        //添加掉血动画
+        var hpani = new cc.Node();
+        var label = hpani.addComponent(cc.Label);
+        label.string = "-"+fire;
+        hpani.position = this.node.position;
+        hpani.x += (Math.random()-0.5)*100;
+        this.game.gameMap.addChild(hpani,9999);
+        cc.tween(hpani)
+        .by(0.2,{scale:0.2,y:200},{easing:"sineOut"})
+        .to(0.1,{opacity:0},{easing:"sineIn"})
+        .removeSelf()
+        .start();
+
+        sdk.vibrate(false);
     }
 
     fire(time){
