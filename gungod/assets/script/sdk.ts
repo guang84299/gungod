@@ -2,6 +2,7 @@ const {ccclass, property} = cc._decorator;
 var gg = window["gg"];
 var wx = window["wx"];
 import { storage } from "./storage";
+import { config } from "./config";
 
 
 export const sdk = {
@@ -129,7 +130,7 @@ export const sdk = {
         var self = this;
         if(window["wx"])
         {
-            this.rewardedVideoAd = wx.createRewardedVideoAd({ adUnitId:'adunit-506949787fc773c5'});
+            this.rewardedVideoAd = wx.createRewardedVideoAd({ adUnitId:config.getVideoId()});
             this.rewardedVideoAd.onLoad(function(){
                 gg.GAME.hasVideo = true;
                 console.log('激励视频 广告加载成功')
@@ -255,9 +256,8 @@ export const sdk = {
                     ));
                 }
             }
-
             this.bannerAd = wx.createBannerAd({
-                adUnitId: 'adunit-c5b2e0e80388172e',
+                adUnitId: config.getBannerId(),
                 style: {
                     left: 0,
                     top: s.height/dpi-300/3.5,
@@ -362,8 +362,8 @@ export const sdk = {
         if(window["wx"])
         {
             var query = "fromid="+gg.qianqista.openid+"&channel="+channel;
-            var title = "皇帝也要搬砖？搬得是金砖！";
-            var imageUrl = "https://www.7q7q.top/share/king/share1.jpg";//cc.url.raw("resources/zhuanfa.jpg");
+            var title = "看你怎么一步一步登上枪神之巅！";
+            var imageUrl = "https://www.7q7q.top/share/gungod/share1.jpg";//cc.url.raw("resources/zhuanfa.jpg");
             if(gg.GAME.shares.length>0)
             {
                 var i = Math.floor(Math.random()*gg.GAME.shares.length);
@@ -481,8 +481,8 @@ export const sdk = {
                 return {
                     query:"channel=sharemenu",
                     withShareTicket: true,
-                    title: "皇帝也要搬砖？搬得是金砖！",
-                    imageUrl: "https://www.7q7q.top/share/king/share1.jpg"
+                    title: "看你怎么一步一步登上枪神之巅！",
+                    imageUrl: "https://www.7q7q.top/share/gungod/share1.jpg"
                 }
             });
 

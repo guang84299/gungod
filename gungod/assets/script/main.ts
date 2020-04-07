@@ -29,24 +29,14 @@ export default class main extends cc.Component {
     }
 
     start () {
-        this.scheduleOnce(this.updateBtn.bind(this),0.2);
+        this.scheduleOnce(this.updateNet.bind(this),0.5);
 
         cc.tween(this.startBtn)
         .by(0.5,{scale:0.3},{easing:"sineIn"})
         .by(0.5,{scale:-0.3},{easing:"sineIn"})
         .union().repeatForever().start();
 
-        //签到
-        if(gg.GAME.isFirstOpen)
-        {
-            gg.GAME.isFirstOpen = false;
-            var qiandaotag = storage.getStorage(storage.qiandaotag);
-            if(qiandaotag<7)
-            {
-                var loginday = storage.getStorage(storage.loginday);
-                if(qiandaotag<loginday)res.openUI("qiandao");
-            }
-        }
+        
        
         //适配刘海屏
         // if(gg.sdk.is_iphonex())
@@ -59,14 +49,6 @@ export default class main extends cc.Component {
         //         topNode.children[i].y -= 15;
         //     }           
         // }
-
-        var yindao = storage.getStorage(storage.yindao);
-        if(yindao==1){
-            yindao = 2;
-            storage.setStorage(storage.yindao,yindao);
-        }
-        if(yindao==2) gg.res.openUI("yindao",null,3);
-        this.yindaoStep = yindao;
 
         gg.audio.playMusic(gg.res.audio_music);
 
@@ -93,6 +75,30 @@ export default class main extends cc.Component {
        
     }
 
+
+    updateNet(){
+        //签到
+        if(gg.GAME.isFirstOpen)
+        {
+            gg.GAME.isFirstOpen = false;
+            var qiandaotag = storage.getStorage(storage.qiandaotag);
+            if(qiandaotag<7)
+            {
+                var loginday = storage.getStorage(storage.loginday);
+                if(qiandaotag<loginday)res.openUI("qiandao");
+            }
+
+            storage.setStorage(storage.logintime,new Date().getTime());
+            storage.uploadStorage(storage.logintime);
+            storage.uploadStorage(storage.loginday);  
+
+            this.currLevel = storage.getStorage(storage.level);
+        
+            this.lvLabel.string = "当前关卡："+this.currLevel;
+            this.updateCoin();
+            this.updateRed();
+        }
+    }
    
     updateCoin(){
         this.currCoin = storage.getStorage(storage.coin);
@@ -103,15 +109,6 @@ export default class main extends cc.Component {
     updateCoinAni(){
         gg.res.showCoinAni(this.coinPos);
         this.updateCoin();
-    }
-
-    updateBtn(){
-        //解锁功能
-        // var num = this.getUnlockRoleNum();
-        // //炒作
-        // cc.find("bottomNode/chaozuo",this.node).active = num > 1;
-       
-        // cc.find("rtxt",this.node).active = num == 0;
     }
 
     //更新小红点

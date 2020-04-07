@@ -70,7 +70,8 @@ export default class loading extends cc.Component {
             storage.setStorage(storage.music,1);
             storage.setStorage(storage.sound,1);
             storage.setStorage(storage.vibrate,1);
-            
+
+    
             this.isFirstOpen = true;
         }   
         
@@ -457,17 +458,7 @@ export default class loading extends cc.Component {
             }
             console.log("datas:",datas);
         }
-        else
-        {
-            gg.GAME.shareNum = 6;
-            var loginday = storage.getStorage(storage.loginday);
-            storage.setStorage(storage.loginday, loginday+1);  
-
-            storage.setStorage(storage.hitenemy, 0); 
-            storage.setStorage(storage.hithead, 0);   
-            storage.setStorage(storage.hitboss, 0);     
-            storage.setStorage(storage.taskdata, {}); 
-        }
+        
     }
     // update (deltaTime: number) {
     //     // Your update function goes here.

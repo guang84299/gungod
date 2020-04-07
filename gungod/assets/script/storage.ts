@@ -42,7 +42,7 @@ export const storage = {
         gunlock: {},
         skinlock: {},
         onlinetime: 0,
-        loginday: 0,
+        loginday: 1,
         logintime: 0,
         qiandaotag: 0,
         hitenemy: 0,

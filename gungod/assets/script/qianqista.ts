@@ -124,6 +124,7 @@ export const qianqista = {
                     //if(cc.myscene == "main")
                     //    cc.storage.playMusic(cc.res.audio_music);
                     gg.audio.playMusic(gg.res.audio_music);
+                    console.log("playMusic",gg.res.audio_music);
 
                 }
                 if(self.onshowmaincallback)

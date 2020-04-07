@@ -13,7 +13,7 @@ export const config = {
 
    getGameId(){
         if(this.isQQ())
-            return "wx35c2e9513b8cc097";
+            return "1110371568";
         else if(this.isWx())
             return "wx35c2e9513b8cc097"; 
         else  return "guntest";       
@@ -21,7 +21,7 @@ export const config = {
 
    getSecret(){
         if(this.isQQ())
-            return "8a1126dfbcf8ca52750956ba8adde717";
+            return "9tEFZVnndS9FjcZp";
         else if(this.isWx())
             return "8a1126dfbcf8ca52750956ba8adde717"; 
         else  return "guntest";       
@@ -34,6 +34,22 @@ export const config = {
             return "测试-微信"; 
         else  return "测试";       
    },
+
+   getBannerId(){
+        if(this.isQQ())
+            return "e5aabb20cee5c8ac9cbf5270758ab69d";
+        else if(this.isWx())
+            return "adunit-c5b2e0e80388172e"; 
+        else  return "guntest";       
+   },
+
+   getVideoId(){
+        if(this.isQQ())
+            return "dc796ef1a81af695303a5c7ce347b2f4";
+        else if(this.isWx())
+            return "adunit-506949787fc773c5"; 
+        else  return "guntest";       
+    },
 
     bgcolor:[cc.color(36,106,206),cc.color(110,24,128),cc.color(25,112,133),cc.color(136,110,94),
         cc.color(89,89,89),cc.color(132,131,172),cc.color(134,152,118),cc.color(149,149,149),
