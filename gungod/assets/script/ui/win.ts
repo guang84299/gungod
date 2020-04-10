@@ -106,6 +106,7 @@ export default class win extends cc.Component {
         .start();
 
         gg.sdk.showBanner();
+        gg.sdk.showSpot();
     }
 
     hide(){

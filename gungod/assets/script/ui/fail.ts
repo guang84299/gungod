@@ -107,6 +107,7 @@ export default class fail extends cc.Component {
         .start();
 
         gg.sdk.showBanner();
+        gg.sdk.showSpot();
     }
 
     hide(){

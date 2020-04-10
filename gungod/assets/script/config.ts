@@ -80,7 +80,7 @@ export const config = {
     
     gunConf:[
         {id:1,type:1,fire:2,num:1,speed:0,unlocklv:0,unlocktype:1,unlockcost:0,anchor:cc.v2(0.3,0.5), aim:cc.v2(43,-3),name:".357麦格农"},
-        {id:2,type:1,fire:3,num:1,speed:0,unlocklv:5,unlocktype:1,unlockcost:100,anchor:cc.v2(0.34,0.5), aim:cc.v2(43,-2),name:"沙漠之鹰"},
+        {id:2,type:1,fire:3,num:1,speed:0,unlocklv:2,unlocktype:1,unlockcost:100,anchor:cc.v2(0.34,0.5), aim:cc.v2(43,-2),name:"沙漠之鹰"},
         {id:3,type:2,fire:1,num:3,speed:0.08,unlocklv:20,unlocktype:2,unlockcost:3,anchor:cc.v2(0.4,0.5), aim:cc.v2(38,0),name:"乌兹"},
         {id:4,type:2,fire:2,num:3,speed:0.12,unlocklv:40,unlocktype:1,unlockcost:8000,anchor:cc.v2(0.35,0.5), aim:cc.v2(77,-3),name:"M-4"},
         {id:5,type:2,fire:2,num:3,speed:0.12,unlocklv:60,unlocktype:2,unlockcost:6,anchor:cc.v2(0.38,0.5), aim:cc.v2(65,-4),name:"AK-47"},

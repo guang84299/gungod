@@ -64,6 +64,19 @@ export default class shiyong extends cc.Component {
             this.btnLingqu.getChildByName("share").active = false;
             this.btnLingqu.getChildByName("video").active = true;
         }
+
+        var level = storage.getStorage(storage.level);
+        if(level<=3)
+        {
+            this.btnLingqu.getChildByName("share").active = false;
+            this.btnLingqu.getChildByName("video").active = false;
+        }
+        else if(level<=5)
+        {
+            this.useShare = true;
+            this.btnLingqu.getChildByName("share").active = true;
+            this.btnLingqu.getChildByName("video").active = false;
+        }
     }
 
     lingqu(){
@@ -103,6 +116,12 @@ export default class shiyong extends cc.Component {
         }
         else if(data == "lingqu")
         {
+            var level = storage.getStorage(storage.level);
+            if(level<=3)
+            {
+                this.lingqu();
+                return;
+            }
             var self = this;
             if(this.useShare)
             {

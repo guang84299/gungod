@@ -22,10 +22,15 @@ export default class yindao extends cc.Component {
         this.timeScale = cc.director.getScheduler().getTimeScale();
     }
 
-    next()
+    next(num)
     {
         this.btnNode.active = true;
-        this.descLabel.string = "就是现在!!!\r\n快速点击屏幕开枪";
+        if(num == 0)
+            this.descLabel.string = "就是现在!!!\r\n快速点击屏幕开枪";
+        else if(num == 1)
+        this.descLabel.string = "学会了吗？注意看准时机\r\n再次点击屏幕开枪";  
+        else if(num == 2)
+        this.descLabel.string = "很简单吧？注意BOSS血量\r\n点击屏幕开枪";      
         
        cc.director.getScheduler().setTimeScale(0);
     }

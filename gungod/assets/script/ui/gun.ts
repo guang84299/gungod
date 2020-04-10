@@ -275,6 +275,7 @@ export default class gun extends cc.Component {
         .start();
 
         gg.sdk.showBanner();
+        gg.sdk.hideClub();
     }
 
     hide(){
@@ -286,6 +287,7 @@ export default class gun extends cc.Component {
         })
         .start();
         gg.audio.playSound('audio/audio_role');
+        gg.sdk.showClub();
     }
 
     click(event,data){

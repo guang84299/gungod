@@ -169,12 +169,12 @@ export const sdk = {
             //初始化插屏广告
             this.interstitialAd = null;
 
-            // // 创建插屏广告实例，提前初始化
-            // if (wx.createInterstitialAd){
-            //     this.interstitialAd = wx.createInterstitialAd({
-            //         adUnitId: 'adunit-5c24bf7d1909b453'
-            //     });
-            // }
+            // 创建插屏广告实例，提前初始化
+            if (wx.createInterstitialAd){
+                this.interstitialAd = wx.createInterstitialAd({
+                    adUnitId: 'adunit-71169d03764c01e5'
+                });
+            }
 
 
         }
@@ -239,7 +239,7 @@ export const sdk = {
             var dpi = cc.winSize.width/s.width;
 
             var w = s.width*0.9;
-
+            var h = 100/337*w;
             var isMoveAd = true;
             var self = this;
             if(gg.GAME.adCheck && !this.is_iphonex())
@@ -260,9 +260,9 @@ export const sdk = {
                 adUnitId: config.getBannerId(),
                 style: {
                     left: 0,
-                    top: s.height/dpi-300/3.5,
+                    top: s.height-h,
                     width: w,
-                    height:100,
+                    height:h,
                 }
             });
             var bannerAd = this.bannerAd;
@@ -576,10 +576,10 @@ export const sdk = {
                 //var dpi = cc.winSize.width/s.width;
 
                 this.clubBtn = wx.createGameClubButton({
-                    icon: 'green',
+                    icon: 'white',
                     style: {
                         left: s.width*0.03,
-                        top: s.height*0.03,
+                        top: s.height*0.12,
                         width: 40,
                         height: 40
                     }
@@ -607,12 +607,57 @@ export const sdk = {
         }
     },
 
+    aldLevelStart: function(lvId)
+    {
+        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+        {
+            wx.aldStage.onStart({
+                stageId   : lvId+"",     //关卡ID 该字段必传
+                stageName : "第"+lvId+"关", //关卡名称  该字段必传
+                // userId    : "06_bmjrPtlm6_2sgVt7hMZOPfL2M" //用户ID 可选
+              })
+        }
+    },
+
+    aldLevelRunning: function(lvId)
+    {
+        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+        {
+            wx.aldStage.onRunning({
+                stageId   : lvId+"",     //关卡ID 该字段必传
+                stageName : "第"+lvId+"关", //关卡名称  该字段必传
+                // userId    : "06_bmjrPtlm6_2sgVt7hMZOPfL2M" //用户ID 可选
+                event     : "revive",  //发起支付 关卡进行中，用户触发的操作    该字段必传
+                params    : {    //参数
+                  itemName  : "复活",  //购买商品名称  该字段必传
+                  desc : "看视频复活"  //商品描述   可选
+                }
+              })
+        }
+    },
+
+    aldLevelEnd: function(lvId,isPass)
+    {
+        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+        {
+            wx.aldStage.onEnd({
+                stageId   : lvId+"",   //关卡ID 该字段必传
+                stageName : "第"+lvId+"关", //关卡名称  该字段必传
+                // userId    : "06_bmjrPtlm6_2sgVt7hMZOPfL2M",  //用户ID 可选
+                event     : isPass ? "complete" : "fail",   //关卡完成  关卡进行中，用户触发的操作    该字段必传
+                params    : {
+                  desc    : isPass ? "关卡完成" : "关卡失败"  //描述
+                }
+              })
+        }
+    },
+
     aldSendEvent: function(eventName)
     {
         if(window["wx"])
         {
             gg.qianqista.event(eventName);
-            // wx.aldSendEvent(eventName);
+            wx.aldSendEvent(eventName);
         }
         
     }

@@ -230,7 +230,7 @@ export default class game extends cc.Component {
         platform.color = this.bgcolor;
 
         var floornum = Math.floor(Math.random()*4)+3;
-        if(this.level == 1 && platformnum == 0)
+        if(this.level == 1)
         {
             floornum = 4;
         }
@@ -365,6 +365,8 @@ export default class game extends cc.Component {
     startGame(){
         this.startLabel.active = false;
         this.excNext();
+
+        gg.sdk.aldLevelStart(this.level);
     }
 
     excNext(){
@@ -527,6 +529,8 @@ export default class game extends cc.Component {
             res.openUI("win",null,this.currCoin);
         },3);
         storage.setStorage(storage.sygunid,0);
+
+        gg.sdk.aldLevelEnd(this.level,true);
     }
 
     nextLevel(){
@@ -546,6 +550,8 @@ export default class game extends cc.Component {
         this.scheduleOnce(this.playerJump.bind(this),1);
         this.gameState = "start";
         this.isFuhuo = true;
+
+        gg.sdk.aldLevelRunning(this.level);
     }
 
     toFangqiFuhuo(){
@@ -557,6 +563,7 @@ export default class game extends cc.Component {
 
     gameOver(){
         res.openUI("fail",null,this.currCoin);
+        gg.sdk.aldLevelEnd(this.level,false);
     }
    
     touchDown(pos){

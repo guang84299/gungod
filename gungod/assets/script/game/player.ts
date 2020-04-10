@@ -24,6 +24,7 @@ export  class player extends cc.Component {
     maxhp = 1;
 
     isOpenYindao=false;
+    yindaonum = 0;
     // onLoad () {}
 
     start () {
@@ -103,7 +104,7 @@ export  class player extends cc.Component {
             cc.director.getScheduler().setTimeScale(0.05);
             this.aimDraw.active = true;
             this.isCanFire = true;
-            if(this.game.level == 1 && dir==0)
+            if(this.game.level == 1)
             {
                 this.isOpenYindao = true;
                 res.openUI("yindao");
@@ -328,7 +329,8 @@ export  class player extends cc.Component {
                     {
                         this.isOpenYindao = false;
                        var yindao = res.getUI("yindao");
-                       if(yindao) yindao.next();
+                       if(yindao) yindao.next(this.yindaonum);
+                       this.yindaonum++;
                     }
                 }
             }

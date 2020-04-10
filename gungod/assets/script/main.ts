@@ -69,6 +69,8 @@ export default class main extends cc.Component {
         gg.sdk.aldSendEvent("进入游戏界面");
 
         gg.sdk.showBanner();
+
+        gg.sdk.showClub();
     }
 
     initData(){
@@ -91,6 +93,11 @@ export default class main extends cc.Component {
             storage.setStorage(storage.logintime,new Date().getTime());
             storage.uploadStorage(storage.logintime);
             storage.uploadStorage(storage.loginday);  
+
+            storage.uploadStorage(storage.hitenemy); 
+            storage.uploadStorage(storage.hithead);   
+            storage.uploadStorage(storage.hitboss);     
+            storage.uploadStorage(storage.taskdata); 
 
             this.currLevel = storage.getStorage(storage.level);
         
@@ -146,6 +153,7 @@ export default class main extends cc.Component {
         }
         else if(data == "start")
         {
+            gg.sdk.hideClub();
             cc.director.loadScene("game");
         }
         
@@ -164,8 +172,8 @@ export default class main extends cc.Component {
         var hasgun = storage.getStorage(storage.hasgun);
         for(var i=0;i<config.gunConf.length;i++)
         {
-            if(this.currCoin>=config.gunConf[i].unlockcost 
-                && this.currLevel>=config.gunConf[i].unlocklv
+            //this.currCoin>=config.gunConf[i].unlockcost 
+            if(this.currLevel>=config.gunConf[i].unlocklv
                 && storage.indexOf(hasgun,i+1) == -1)
                {
                     isRed = true;
@@ -181,8 +189,8 @@ export default class main extends cc.Component {
         var hasskin = storage.getStorage(storage.hasskin);
         for(var i=0;i<config.playerConf.length;i++)
         {
-            if(this.currCoin>=config.playerConf[i].unlockcost 
-                && this.currLevel>=config.playerConf[i].unlocklv
+            //this.currCoin>=config.playerConf[i].unlockcost 
+            if(this.currLevel>=config.playerConf[i].unlocklv
                 && storage.indexOf(hasskin,i+1) == -1)
                {
                     isRed = true;
