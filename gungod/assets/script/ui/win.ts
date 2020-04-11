@@ -162,6 +162,10 @@ export default class win extends cc.Component {
                 gg.sdk.aldSendEvent("胜利_视频");
             }
         }
+        else if(data == "share")
+        {
+            gg.sdk.share();
+        }
         
         gg.audio.playSound(gg.res.audio_button);
         cc.log(data);

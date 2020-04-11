@@ -1,4 +1,5 @@
 import { storage } from "../storage";
+import { config } from "../config";
 
 const {ccclass, property} = cc._decorator;
 var gg = window["gg"];
@@ -66,7 +67,7 @@ export default class fuhuo extends cc.Component {
         .to(0.2,{scaleX:0},{easing:"sineOut"})
         .call(()=>{
             this.node.destroy();
-            // gg.sdk.hideBanner();
+            if(config.isTT()) gg.sdk.hideBanner();
         })
         .start();
     }

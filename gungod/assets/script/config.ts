@@ -11,9 +11,15 @@ export const config = {
         return window["qq"] ? true : false;
    },
 
+   isTT(){
+    return window["tt"] ? true : false;
+   },
+
    getGameId(){
         if(this.isQQ())
             return "1110371568";
+        else if(this.isTT())
+            return "tt317447c9ae5e785d";     
         else if(this.isWx())
             return "wx35c2e9513b8cc097"; 
         else  return "guntest";       
@@ -22,6 +28,8 @@ export const config = {
    getSecret(){
         if(this.isQQ())
             return "9tEFZVnndS9FjcZp";
+        else if(this.isTT())
+            return "02a48e692de7049b16d426a214166ea788453a19";         
         else if(this.isWx())
             return "8a1126dfbcf8ca52750956ba8adde717"; 
         else  return "guntest";       
@@ -30,6 +38,8 @@ export const config = {
     getGameName(){
         if(this.isQQ())
             return "测试-QQ";
+        else if(this.isTT())
+            return "测试-TT";            
         else if(this.isWx())
             return "测试-微信"; 
         else  return "测试";       
@@ -38,6 +48,8 @@ export const config = {
    getBannerId(){
         if(this.isQQ())
             return "e5aabb20cee5c8ac9cbf5270758ab69d";
+        else if(this.isTT())
+            return "233mm0bofh7cffbn5n";     
         else if(this.isWx())
             return "adunit-c5b2e0e80388172e"; 
         else  return "guntest";       
@@ -46,8 +58,20 @@ export const config = {
    getVideoId(){
         if(this.isQQ())
             return "dc796ef1a81af695303a5c7ce347b2f4";
+        else if(this.isTT())
+            return "19gin3eq0foe2c7jg7";        
         else if(this.isWx())
             return "adunit-506949787fc773c5"; 
+        else  return "guntest";       
+    },
+
+    getSpotId(){
+        if(this.isQQ())
+            return "adunit-71169d03764c01e5";
+        else if(this.isTT())
+            return "fnban5j273rbpep1r6";        
+        else if(this.isWx())
+            return "adunit-71169d03764c01e5"; 
         else  return "guntest";       
     },
 

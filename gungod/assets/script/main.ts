@@ -67,10 +67,16 @@ export default class main extends cc.Component {
         this.updateCoin();
         this.updateRed();
         gg.sdk.aldSendEvent("进入游戏界面");
-
         gg.sdk.showBanner();
-
         gg.sdk.showClub();
+
+        if(gg.GAME.isFirstOpen)
+        {
+            this.scheduleOnce(function(){
+                gg.sdk.showBanner();
+            },1.2);
+        }
+        
     }
 
     initData(){
@@ -104,6 +110,7 @@ export default class main extends cc.Component {
             this.lvLabel.string = "当前关卡："+this.currLevel;
             this.updateCoin();
             this.updateRed();
+
         }
     }
    
@@ -155,6 +162,10 @@ export default class main extends cc.Component {
         {
             gg.sdk.hideClub();
             cc.director.loadScene("game");
+        }
+        else if(data == "share")
+        {
+            gg.sdk.share();
         }
         
         gg.audio.playSound(gg.res.audio_button);

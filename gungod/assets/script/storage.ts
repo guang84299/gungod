@@ -27,6 +27,8 @@ export const storage = {
     taskdata: "taskdata",
     sygunid: "sygunid",
     yindao:"yindao",
+    videoPath: "videoPath",
+    sharenum: "sharenum",
 
     defaultVal: {
         music:1,
@@ -51,6 +53,8 @@ export const storage = {
         taskdata: {},
         sygunid: 0,
         yindao: 0,
+        sharenum: 0,
+        videoPath: {}
     },
 
     setStorage: function(key,val)

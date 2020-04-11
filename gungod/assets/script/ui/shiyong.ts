@@ -71,7 +71,7 @@ export default class shiyong extends cc.Component {
             this.btnLingqu.getChildByName("share").active = false;
             this.btnLingqu.getChildByName("video").active = false;
         }
-        else if(level<=5)
+        else if(level<=5 && !config.isTT())
         {
             this.useShare = true;
             this.btnLingqu.getChildByName("share").active = true;
@@ -102,7 +102,7 @@ export default class shiyong extends cc.Component {
         .to(0.2,{scaleX:0},{easing:"sineOut"})
         .call(()=>{
             this.node.destroy();
-            // gg.sdk.hideBanner();
+            if(config.isTT()) gg.sdk.hideBanner();
         })
         .start();
 

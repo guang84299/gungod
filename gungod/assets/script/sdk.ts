@@ -1,6 +1,7 @@
 const {ccclass, property} = cc._decorator;
 var gg = window["gg"];
 var wx = window["wx"];
+var tt = window["tt"];
 import { storage } from "./storage";
 import { config } from "./config";
 
@@ -170,12 +171,25 @@ export const sdk = {
             this.interstitialAd = null;
 
             // 创建插屏广告实例，提前初始化
-            if (wx.createInterstitialAd){
-                this.interstitialAd = wx.createInterstitialAd({
-                    adUnitId: 'adunit-71169d03764c01e5'
-                });
+            if(config.isTT())
+            {
+                if(tt.createInterstitialAd)
+                {
+                    this.interstitialAd = tt.createInterstitialAd({
+                        adUnitId: config.getSpotId()
+                    });
+                }
             }
-
+            else
+            {
+                if (wx.createInterstitialAd){
+                    this.interstitialAd = wx.createInterstitialAd({
+                        adUnitId: config.getSpotId()
+                    });
+                }
+            }
+            
+            console.log("interstitialAd",this.interstitialAd);
 
         }
         this.bannerTime = 0;
@@ -350,9 +364,25 @@ export const sdk = {
         {
             if (this.interstitialAd)
             {
-                this.interstitialAd.show().catch(function(err) {
-                    console.error(err)
-                });
+                if(config.isTT())
+                {
+                    var interstitialAd = this.interstitialAd;
+                    this.interstitialAd
+                    .load()
+                    .then(() => {
+                        interstitialAd.show();
+                    })
+                    .catch(err => {
+                        console.log(err);
+                    });
+                }
+                else
+                {
+                    this.interstitialAd.show().catch(function(err) {
+                        console.error(err)
+                    });
+                }
+                
             }
         }
     },
@@ -374,23 +404,55 @@ export const sdk = {
                     imageUrl = sdata.imageUrl;
                 }
             }
-            wx.shareAppMessage({
-                query:query,
-                title: title,
-                imageUrl: imageUrl,
-                // success: function(res)
-                // {
-                //     if(callback)
-                //         callback(true);
-                //     cc.log(res);
-                // },
-                // fail: function()
-                // {
-                //     if(callback)
-                //         callback(false);
-                // }
-            });
-            this.shareJudge(callback);
+            if(config.isTT())
+            {
+                var videoPath = storage.getStorage(storage.videoPath);
+                if(!videoPath.path){
+                    gg.res.showToast("暂未录制视频!");
+                    return;
+                }
+                tt.shareAppMessage({
+                    channel: 'video',
+                    title: title,
+                    desc: title,
+                    imageUrl: imageUrl,
+                    templateId: '', // 替换成通过审核的分享ID
+                    query: query,
+                    extra: {
+                      videoPath: videoPath.path, // 可替换成录屏得到的视频地址
+                      videoTopics: ['全民枪神','全民枪神小游戏','抖音小游戏']
+                    },
+                    success() {
+                        console.log('分享视频成功');
+                        if(callback) callback(true);
+                      },
+                      fail(e) {
+                        console.log('分享视频失败');
+                        if(callback) callback(false);
+                    }  
+                });           
+            }
+            else
+            {
+                wx.shareAppMessage({
+                    query:query,
+                    title: title,
+                    imageUrl: imageUrl,
+                    // success: function(res)
+                    // {
+                    //     if(callback)
+                    //         callback(true);
+                    //     cc.log(res);
+                    // },
+                    // fail: function()
+                    // {
+                    //     if(callback)
+                    //         callback(false);
+                    // }
+                });
+                this.shareJudge(callback);
+            }
+            
         }
         else
         {
@@ -568,7 +630,7 @@ export const sdk = {
 
     showClub: function()
     {
-        if(window["wx"])
+        if(config.isWx() && !config.isTT())
         {
             if(!this.clubBtn)
             {
@@ -609,7 +671,7 @@ export const sdk = {
 
     aldLevelStart: function(lvId)
     {
-        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+        if(config.isWx() && !config.isTT())
         {
             wx.aldStage.onStart({
                 stageId   : lvId+"",     //关卡ID 该字段必传
@@ -621,7 +683,7 @@ export const sdk = {
 
     aldLevelRunning: function(lvId)
     {
-        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+        if(config.isWx() && !config.isTT())
         {
             wx.aldStage.onRunning({
                 stageId   : lvId+"",     //关卡ID 该字段必传
@@ -638,7 +700,7 @@ export const sdk = {
 
     aldLevelEnd: function(lvId,isPass)
     {
-        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+        if(config.isWx() && !config.isTT())
         {
             wx.aldStage.onEnd({
                 stageId   : lvId+"",   //关卡ID 该字段必传
@@ -657,9 +719,47 @@ export const sdk = {
         if(window["wx"])
         {
             gg.qianqista.event(eventName);
-            wx.aldSendEvent(eventName);
+            if(config.isWx() && !config.isTT())
+                wx.aldSendEvent(eventName);
         }
         
+    },
+
+    gameRecorderStart: function(){
+        if(config.isTT())
+        {
+            if(!this.recorderManage)
+            {
+                var self = this;
+                const recorder = tt.getGameRecorderManager();
+                this.recorderManage =  recorder;
+                recorder.onStart(res =>{
+                    console.log('录屏开始');
+                    // do somethine;
+                })
+
+                recorder.onStop(res =>{
+                    storage.setStorage(storage.videoPath,{path:res.videoPath});
+                    console.log(res.videoPath);
+                    // do somethine;
+                })
+                recorder.onError(errMsg =>{
+                    console.log(errMsg);
+                    // do somethine;
+                })
+            }
+            this.recorderManage.start({
+                duration: 300,
+            })
+        }
+        
+    },
+
+    gameRecorderStop: function(){
+        if(config.isTT())
+        {
+            if(this.recorderManage)this.recorderManage.stop();
+        }
     }
 
 }

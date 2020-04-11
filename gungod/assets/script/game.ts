@@ -72,6 +72,8 @@ export default class game extends cc.Component {
         }
        this.initGame();
        gg.audio.playMusic(res.audio_music,0.5);
+
+       if(config.isTT())  gg.sdk.hideBanner();
     }
 
     initPhysics()
@@ -151,6 +153,30 @@ export default class game extends cc.Component {
         gg.audio.playSound(gg.res.audio_coin);
     }
 
+    addCoinAni(num){
+        var pos = this.playerSc.node.position.sub(this.camera.node.position);
+        for(var i=0;i<num;i++)
+        {
+            var node = new cc.Node();
+            node.addComponent(cc.Sprite);
+            this.uiNode.addChild(node);
+            res.setSpriteFrame("images/common/coin",node);
+            node.scale = 0.8;
+            node.x = pos.x;
+            node.y = pos.y-cc.winSize.height/2;
+            cc.tween(node)
+            .to(0.3,{position:cc.v2(node.x+(Math.random()-0.5)*300,node.y+(Math.random()-0.5)*300)},{easing:"sineOut"})
+            .to(0.5+0.05*i,{position:this.coinPos},{easing:"sineIn"})
+            .call(()=>{
+                this.currCoin ++;
+                this.coinLabel.string = ""+this.currCoin;
+            })
+            .removeSelf()
+            .start();
+        }
+        gg.audio.playSound(gg.res.audio_coin);
+    }
+
     addHitEnemy(num){
         this.hitEnemy += num;
         this.hitenemyLabel.string = this.hitEnemy+"";
@@ -197,6 +223,7 @@ export default class game extends cc.Component {
         this.enemySc = null;
         cc.director.getScheduler().setTimeScale(1);
 
+        gg.sdk.gameRecorderStart();
         this.scheduleOnce(function(){
             this.gameState = "start";
             this.camera.node.y = 0;
@@ -395,7 +422,7 @@ export default class game extends cc.Component {
             this.isBoss = true;
         }
         var fn = Math.floor(Math.random()*floornum);
-        if(this.level == 1 && this.currFloor == 0)
+        if(this.level == 1 )//&& this.currFloor == 0
         {
             fn = 0;
         }
@@ -468,6 +495,7 @@ export default class game extends cc.Component {
     enemyJump(platform){
         var floornum = platform["floornum"];
         var fn = Math.floor(Math.random()*floornum);
+        if(this.level == 1) fn = 0;
         var x =  50*floornum-25 - 50*fn;// (50*floornum + (platform.width/2-50*floornum)/2)-25 + 50*fn;
         if(this.currFloor%2==0) x = -x;
         
@@ -525,8 +553,29 @@ export default class game extends cc.Component {
             this.playerSc.winAni();
         },1);
 
+        gg.sdk.gameRecorderStop();
+
+        var self = this;
         this.scheduleOnce(function(){
-            res.openUI("win",null,this.currCoin);
+            var sharenum = storage.getStorage(storage.sharenum);
+            if(sharenum<2)
+            {
+                res.openUI("sharevedio",null,function(awrad){
+                    if(awrad>0) 
+                    {
+                        self.addCoinAni(12);
+                        awrad -= 12;
+                    }
+                    self.scheduleOnce(function(){
+                        self.coinLabel.string = ""+(self.currCoin+awrad);
+                        res.openUI("win",null,self.currCoin+awrad);
+                    },1.5);
+                });
+            }
+            else
+            {
+                res.openUI("win",null,self.currCoin);
+            }
         },3);
         storage.setStorage(storage.sygunid,0);
 
@@ -562,6 +611,7 @@ export default class game extends cc.Component {
     }
 
     gameOver(){
+        gg.sdk.gameRecorderStop();
         res.openUI("fail",null,this.currCoin);
         gg.sdk.aldLevelEnd(this.level,false);
     }

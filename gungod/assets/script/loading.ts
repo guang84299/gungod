@@ -74,7 +74,8 @@ export default class loading extends cc.Component {
     
             this.isFirstOpen = true;
         }   
-        
+        storage.setStorage(storage.videoPath,{});
+
         if(config.isWx())
             this.loadSubpackage();
         else 
@@ -454,6 +455,7 @@ export default class loading extends cc.Component {
                 storage.setStorage(storage.hithead, 0);   
                 storage.setStorage(storage.hitboss, 0);     
                 storage.setStorage(storage.taskdata, {}); 
+                storage.setStorage(storage.sharenum, 0);     
                 
             }
             console.log("datas:",datas);
