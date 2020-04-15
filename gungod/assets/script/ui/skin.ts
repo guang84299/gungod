@@ -76,7 +76,7 @@ export default class skin extends cc.Component {
             if(playerConf.type == 2)types = "吸金型";
             else if(playerConf.type == 3)types = "肉盾型";
             type.string = types;
-            hp.string = playerConf.hp+"";
+            hp.string = "+"+playerConf.hp+"";
             coin.string = playerConf.coin+"";
 
             if(skinid == currSkinid) 

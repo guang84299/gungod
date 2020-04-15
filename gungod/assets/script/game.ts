@@ -200,7 +200,7 @@ export default class game extends cc.Component {
         // var level = this.level<=config.levels.length ? this.level : config.levels.length;
         // this.levelConf = config.levels[level-1];
         this.levelConf.id = this.level;
-        this.levelConf.floor = this.level+1 > 10 ? 10 : this.level+1;
+        this.levelConf.floor = this.level+1 > 3 ? 3 : this.level+1;
         this.levelConf.bosshp = this.level+5 > 100 ? 100 : this.level+5;
         this.bgcolor = config.bgcolor[(this.level-1)%config.bgcolor.length];
 
@@ -228,7 +228,7 @@ export default class game extends cc.Component {
             this.gameState = "start";
             this.camera.node.y = 0;
             var hasgun = storage.getStorage(storage.hasgun);
-            if(this.level>1 && (storage.indexOf(hasgun,5) == -1 || storage.indexOf(hasgun,7) == -1))
+            if(this.level>1 && (storage.indexOf(hasgun,5) == -1 || storage.indexOf(hasgun,7) == -1 || storage.indexOf(hasgun,16) == -1))
             {
                 var self = this;
                 res.openUI("shiyong",null,function(){
@@ -553,10 +553,9 @@ export default class game extends cc.Component {
             this.playerSc.winAni();
         },1);
 
-        gg.sdk.gameRecorderStop();
-
         var self = this;
         this.scheduleOnce(function(){
+            gg.sdk.gameRecorderStop();
             var sharenum = storage.getStorage(storage.sharenum);
             if(sharenum<2 && config.isTT())
             {

@@ -32,6 +32,10 @@ export default class shiyong extends cc.Component {
        {
            randguns.push(config.gunConf[7-1]);
        }
+       if(storage.indexOf(hasgun,16) == -1)
+       {
+           randguns.push(config.gunConf[16-1]);
+       }
        
        var gunConf = randguns[Math.floor(Math.random()*randguns.length)];
 
