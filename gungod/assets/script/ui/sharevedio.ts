@@ -74,7 +74,10 @@ export default class sharevedio extends cc.Component {
         {
             var self = this;
             gg.sdk.share(function(r){
-                self.lingqu();
+                if(r)
+                {
+                    self.lingqu();
+                }
             });
         }
         

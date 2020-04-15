@@ -1,4 +1,5 @@
 import { storage } from "../storage";
+import { config } from "../config";
 
 const {ccclass, property} = cc._decorator;
 var gg = window["gg"];
@@ -15,6 +16,8 @@ export default class win extends cc.Component {
     btnHome: cc.Node = null;
     @property(cc.Node)
     btnNext: cc.Node = null;
+    @property(cc.Node)
+    vShare: cc.Node = null;
 
     bg = null;
     game = null;
@@ -51,6 +54,8 @@ export default class win extends cc.Component {
         gg.audio.playSound('audio/win');
 
         gg.sdk.aldSendEvent("关卡胜利_"+storage.getStorage(storage.level));
+
+        this.vShare.active = config.isTT();
     }
 
     updateUI()

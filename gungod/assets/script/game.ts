@@ -558,7 +558,7 @@ export default class game extends cc.Component {
         var self = this;
         this.scheduleOnce(function(){
             var sharenum = storage.getStorage(storage.sharenum);
-            if(sharenum<2)
+            if(sharenum<2 && config.isTT())
             {
                 res.openUI("sharevedio",null,function(awrad){
                     if(awrad>0) 

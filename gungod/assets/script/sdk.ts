@@ -428,7 +428,12 @@ export const sdk = {
                       },
                       fail(e) {
                         console.log('分享视频失败');
-                        if(callback) callback(false);
+                        if(callback)
+                        {
+                            callback(false);
+                            gg.res.showToast("分享视频失败!");
+                        }
+                        
                     }  
                 });           
             }
