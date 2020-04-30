@@ -555,27 +555,50 @@ export default class game extends cc.Component {
 
         var self = this;
         this.scheduleOnce(function(){
-            gg.sdk.gameRecorderStop();
-            var sharenum = storage.getStorage(storage.sharenum);
-            if(sharenum<2 && config.isTT())
-            {
-                res.openUI("sharevedio",null,function(awrad){
-                    if(awrad>0) 
-                    {
-                        self.addCoinAni(12);
-                        awrad -= 12;
-                    }
+            gg.sdk.gameRecorderStop(function(){
+                var rad = Math.random();
+                var isSong = false;
+                var hasgun = storage.getStorage(storage.hasgun);
+                if(storage.indexOf(hasgun,5) == -1 || storage.indexOf(hasgun,7) == -1 || storage.indexOf(hasgun,16) == -1)
+                isSong = true;
+                if(config.isTT())
+                {
                     self.scheduleOnce(function(){
-                        self.coinLabel.string = ""+(self.currCoin+awrad);
-                        res.openUI("win",null,self.currCoin+awrad);
-                    },1.5);
-                });
-            }
-            else
-            {
-                res.openUI("win",null,self.currCoin);
-            }
-        },3);
+                        if(rad>0.5 && isSong)
+                        {
+                            res.openUI("songgun",null,function(){
+                                res.openUI("win",null,self.currCoin);
+                            });
+                        }
+                        else
+                        {
+                            res.openUI("sharevedio",null,function(awrad){
+                                if(awrad>0) 
+                                {
+                                    self.addCoinAni(12);
+                                    awrad -= 12;
+                                }
+                                self.scheduleOnce(function(){
+                                    self.coinLabel.string = ""+(self.currCoin+awrad);
+                                    res.openUI("win",null,self.currCoin+awrad);
+                                },1.5);
+                            });
+                        }
+                    },2);
+                }
+                else
+                {
+                    if(isSong)
+                    {
+                        res.openUI("songgun",null,function(){
+                            res.openUI("win",null,self.currCoin);
+                        });
+                    }
+                    else
+                    res.openUI("win",null,self.currCoin);
+                }
+            });
+        },config.isTT()?1.5:3);
         storage.setStorage(storage.sygunid,0);
 
         gg.sdk.aldLevelEnd(this.level,true);
@@ -611,7 +634,22 @@ export default class game extends cc.Component {
 
     gameOver(){
         gg.sdk.gameRecorderStop();
-        res.openUI("fail",null,this.currCoin);
+        var isSong = false;
+        var hasgun = storage.getStorage(storage.hasgun);
+        if(storage.indexOf(hasgun,5) == -1 || storage.indexOf(hasgun,7) == -1 || storage.indexOf(hasgun,16) == -1)
+        isSong = true;
+        if(isSong)
+        {
+            var self = this;
+            res.openUI("songgun",null,function(){
+                res.openUI("fail",null,self.currCoin);
+            });
+        }
+        else
+        {
+            res.openUI("fail",null,this.currCoin);
+        }
+        
         gg.sdk.aldLevelEnd(this.level,false);
     }
    

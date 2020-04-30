@@ -51,7 +51,7 @@ export  class player extends cc.Component {
             self.node.setContentSize(player.getContentSize());
             if(callback) callback();
         });
-        this.hp = config.playerConf[skinid-1].hp+5;
+        this.hp = config.playerConf[skinid-1].hp+1;
         this.maxhp = this.hp;
 
         var gunid = storage.getStorage(storage.gunid);

@@ -746,24 +746,32 @@ export const sdk = {
                 recorder.onStop(res =>{
                     storage.setStorage(storage.videoPath,{path:res.videoPath});
                     console.log(res.videoPath);
+                    if(this.recordercallback) this.recordercallback();
                     // do somethine;
                 })
                 recorder.onError(errMsg =>{
                     console.log(errMsg);
+                    if(this.recordercallback) this.recordercallback();
                     // do somethine;
                 })
             }
             this.recorderManage.start({
                 duration: 300,
             })
+            this.recordercallback = null;
         }
         
     },
 
-    gameRecorderStop: function(){
+    gameRecorderStop: function(callback){
         if(config.isTT())
         {
+            this.recordercallback = callback;
             if(this.recorderManage)this.recorderManage.stop();
+        }
+        else
+        {
+            if(callback) callback();
         }
     }
 
