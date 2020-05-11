@@ -304,11 +304,12 @@ export const sdk = {
                 {
                     self.hideBanner();
                 }
+                else bannerAd.show();
             });
             this.bannerAd.onError(function(res){
                 console.error(res);
             });
-            this.bannerAd.show();
+            
 
             this.bannerTime = new Date().getTime();
 
@@ -723,7 +724,7 @@ export const sdk = {
     {
         if(window["wx"])
         {
-            gg.qianqista.event(eventName);
+            // gg.qianqista.event(eventName);
             if(config.isWx() && !config.isTT())
                 wx.aldSendEvent(eventName);
         }

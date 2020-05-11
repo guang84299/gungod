@@ -54,12 +54,12 @@ export default class loading extends cc.Component {
         // cc.game.setFrameRate(30);
         var self = this;
 
-        qianqista.init(config.getGameId(),config.getSecret(),config.getGameName(),function(){
-            // var score = storage.getStorage(storage.lv);
-            // sdk.uploadScore(score,self.initNet.bind(self));
-            self.initNet();
-        },null);
-        sdk.getUserInfo();
+        // qianqista.init(config.getGameId(),config.getSecret(),config.getGameName(),function(){
+        //     // var score = storage.getStorage(storage.lv);
+        //     // sdk.uploadScore(score,self.initNet.bind(self));
+        //     self.initNet();
+        // },null);
+        // sdk.getUserInfo();
         //sdk.videoLoad();
         sdk.closeRank();
         this.canLoadVideo = true;
@@ -74,8 +74,12 @@ export default class loading extends cc.Component {
     
             this.isFirstOpen = true;
         }   
+        else 
+        {
+            this.updateLocalData('{}');
+        }
         storage.setStorage(storage.videoPath,{});
-
+        this.updateUIControl();
         if(config.isWx())
             this.loadSubpackage();
         else 
@@ -335,6 +339,7 @@ export default class loading extends cc.Component {
         gg.GAME.lixianswitch = false;
         gg.GAME.adCheck = true;
         gg.GAME.shares = [];
+        gg.GAME.control = [];
         if(gg.GAME.control.length>0)
         {
             for(var i=0;i<gg.GAME.control.length;i++)

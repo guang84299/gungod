@@ -383,12 +383,12 @@ export const qianqista = {
     {
         if(this.state == 1)
         {
-            var self = this;
-            this.httpPost("uploaddatas",{gameId:this.gameId,openid:this.openid,datas:datas},function(res){
-                console.log("uploaddatas:",res);
-                if(callback)
-                    callback(res);
-            });
+            // var self = this;
+            // this.httpPost("uploaddatas",{gameId:this.gameId,openid:this.openid,datas:datas},function(res){
+            //     console.log("uploaddatas:",res);
+            //     if(callback)
+            //         callback(res);
+            // });
         }
     },
     guid:function() {

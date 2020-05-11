@@ -72,9 +72,9 @@ export default class main extends cc.Component {
 
         if(gg.GAME.isFirstOpen)
         {
-            this.scheduleOnce(function(){
-                gg.sdk.showBanner();
-            },1.2);
+            // this.scheduleOnce(function(){
+            //     gg.sdk.showBanner();
+            // },1.2);
         }
         
     }
