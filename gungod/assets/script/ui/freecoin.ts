@@ -25,10 +25,11 @@ export default class freecoin extends cc.Component {
     updateUI()
     {
         this.useShare = false;
-        if(gg.GAME.share)
+        var sharenum = storage.getStorage(storage.sharenum);
+        if(gg.GAME.user && !gg.GAME.user.isLegal && sharenum<gg.GAME.user.sharecfg.totalNum)
         {
-            var rad = parseInt(gg.GAME.freecoinAd);
-            if(!gg.GAME.hasVideo) rad = 100;
+            var rad = parseInt(gg.GAME.user.shareRad);
+            if(!gg.GAME.hasVideo || sharenum<gg.GAME.user.sharecfg.initNum) rad = 100;
             if(Math.random()*100 < rad)
             {
                 this.useShare = true;

@@ -18,7 +18,7 @@ gg.config = config;
 gg.GAME = {};
 gg.GAME.isFirstOpen = true;
 gg.GAME.shareNum = 6;
-
+gg.GAME.isOpenChouti = false;
 
 @ccclass
 export default class loading extends cc.Component {
@@ -54,11 +54,11 @@ export default class loading extends cc.Component {
         // cc.game.setFrameRate(30);
         var self = this;
 
-        // qianqista.init(config.getGameId(),config.getSecret(),config.getGameName(),function(){
-        //     // var score = storage.getStorage(storage.lv);
-        //     // sdk.uploadScore(score,self.initNet.bind(self));
-        //     self.initNet();
-        // },null);
+        qianqista.init(config.getGameId(),config.getSecret(),config.getGameName(),function(){
+            // var score = storage.getStorage(storage.lv);
+            // sdk.uploadScore(score,self.initNet.bind(self));
+            // self.initNet();
+        },null);
         // sdk.getUserInfo();
         //sdk.videoLoad();
         sdk.closeRank();
@@ -463,6 +463,7 @@ export default class loading extends cc.Component {
                 storage.setStorage(storage.sharenum, 0);     
                 
             }
+            storage.setStorage(storage.logintime, t1);
             console.log("datas:",datas);
         }
         

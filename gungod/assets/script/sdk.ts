@@ -224,7 +224,7 @@ export const sdk = {
         }
     },
 
-    showBanner: function(node,callback,isHide)
+    showBanner: function(node?:any,callback?:any,isHide?:any)
     {
 
         if(window["wx"])
@@ -388,23 +388,47 @@ export const sdk = {
         }
     },
 
+    judgeLegal: function(){
+        if(gg.GAME.user) 
+        {
+            return gg.GAME.user.isLegal;
+        }
+        return true;
+    },
+
+    getShareConf: function(){
+        var query = "fromid="+gg.qianqista.openid;
+        var title = "看你怎么一步一步登上枪神之巅！";
+        var imageUrl = "https://www.7q7q.top/share/gungod/share1.jpg";
+        var shareConf = null;
+        if(gg.GAME.user) 
+        {
+            if(gg.GAME.user.isLegal)
+            {
+                shareConf = gg.GAME.user.shares.legal[Math.floor(Math.random()*gg.GAME.user.shares.legal.length)];
+            }
+            else
+            {
+                shareConf = gg.GAME.user.shares.fuhuo[Math.floor(Math.random()*gg.GAME.user.shares.fuhuo.length)];
+            }
+        }
+        if(shareConf)
+        {
+            title = shareConf.desc;
+            imageUrl = shareConf.img;
+        }
+        return {query:query,title:title,imageUrl:imageUrl};
+    },
+
     share: function(callback,channel)
     {
         if(window["wx"])
         {
-            var query = "fromid="+gg.qianqista.openid+"&channel="+channel;
-            var title = "看你怎么一步一步登上枪神之巅！";
-            var imageUrl = "https://www.7q7q.top/share/gungod/share1.jpg";//cc.url.raw("resources/zhuanfa.jpg");
-            if(gg.GAME.shares.length>0)
-            {
-                var i = Math.floor(Math.random()*gg.GAME.shares.length);
-                var sdata = gg.GAME.shares[i];
-                if(sdata && sdata.title && sdata.imageUrl)
-                {
-                    title = sdata.title;
-                    imageUrl = sdata.imageUrl;
-                }
-            }
+            var shareConf = this.getShareConf();
+            var query = shareConf.query;
+            var title = shareConf.title;
+            var imageUrl = shareConf.imageUrl;//cc.url.raw("resources/zhuanfa.jpg");
+           
             if(config.isTT())
             {
                 var videoPath = storage.getStorage(storage.videoPath);
@@ -473,29 +497,40 @@ export const sdk = {
         gg.qianqista.sharecallback = callback;
     },
 
-    skipGame: function(gameId,url)
+    skipGame: function(data,callback)
     {
-        if(window["wx"])
+        if(window["wx"] && data)
         {
-            if(gameId)
+            if(data.appId)
             {
-                var pathstr = 'pages/main/main?channel=sheep';
                 wx.navigateToMiniProgram({
-                    appId: gameId,
-                    path: pathstr,
+                    appId: data.appId,
+                    path: data.path,
                     extraData: {
-                        foo: 'bar'
+                        id: data.id
                     },
                     // envVersion: 'develop',
                     success: function(res) {
                         // 打开成功
+                        if(callback) callback(true);
+                    },
+                    fail: function(res)
+                    {
+                        if(callback) callback(false);
                     }
                 });
             }
-            //else if(url && url.length > 5)
-            //{
-            //    //BK.MQQ.Webview.open(url);
-            //}
+            else if(data.qrcode)
+            {
+                wx.previewImage({
+                    current: data.qrcode, // 当前显示图片的http链接
+                    urls: [data.qrcode] // 需要预览的图片http链接列表
+                  });
+                if(callback) callback(true);
+            }
+        }
+        else{
+            if(callback) callback(false);
         }
     },
 
@@ -553,6 +588,14 @@ export const sdk = {
                     imageUrl: "https://www.7q7q.top/share/gungod/share1.jpg"
                 }
             });
+
+            wx.onShareTimeline(() => {
+                return {
+                  title: '看你怎么一步一步登上枪神之巅！',
+                  imageUrl: 'https://www.7q7q.top/share/gungod/share1.jpg', // 图片 URL
+                  query: 'channel=sharequan'
+                }
+              });
 
             wx.updateShareMenu({
                 withShareTicket: true,

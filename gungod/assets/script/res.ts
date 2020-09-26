@@ -124,7 +124,7 @@ export const res = {
         }
     },
 
-    openUI: function(name,parent?:cc.Node,showType?:any)
+    openUI: function(name,parent?:cc.Node,showType?:any,isSg?:any)
     {
         if(!parent) parent = cc.find("Canvas");
         if(parent)
@@ -143,7 +143,9 @@ export const res = {
             }
         }
         parent["opening_"+name] = true;
-        cc.loader.loadRes("prefab/ui/"+name, function(err, prefab)
+        var str = "prefab/ui/";
+        if(isSg) str = "skipgame/";
+        cc.loader.loadRes(str+name, function(err, prefab)
         {
             parent["opening_"+name] = false;
             if(err)

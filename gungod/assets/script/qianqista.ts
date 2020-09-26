@@ -80,11 +80,19 @@ export const qianqista = {
                 if(self.sharecallback)
                 {
                     var t = new Date().getTime();
-                    if(self.sharetime && t - self.sharetime > 3000 && gg.GAME.shareNum>0)//&& self.sharenum>=1
+                    var rad = 0;
+                    var confNum = 2;
+                    if(gg.GAME.user) 
+                    {
+                        rad = gg.GAME.user.sharecfg.fialRad;
+                    }
+                    if((self.sharetime && t - self.sharetime >= 5000 && Math.random()>rad) || self.sharenum>=confNum)
                     {
                         self.sharecallback(true);
-                        self.sharenum++;
-                        gg.GAME.shareNum --;
+                        self.sharenum = 0;
+                        // gg.GAME.shareNum --;
+                        var sharenum = gg.storage.getStorage(gg.storage.sharenum);
+                        gg.storage.setStorage(gg.storage.sharenum,sharenum+1);
                     }
                     else
                     {
@@ -701,14 +709,14 @@ export const qianqista = {
 
     sendRequest2: function(path, data, handler){
         var xhr = cc.loader.getXMLHttpRequest();
-        var params = "?";
-        for (var k in data) {
-            if (params != "?") {
-                params += "&";
-            }
-            params += k + "=" + data[k];
-        }
-        var requestURL = this.url2 + path + encodeURI(params);
+        // var params = "?";
+        // for (var k in data) {
+        //     if (params != "?") {
+        //         params += "&";
+        //     }
+        //     params += k + "=" + data[k];
+        // }
+        var requestURL = path;//this.url2 + path + encodeURI(params);
         console.log("RequestURL:" + requestURL);
 
         xhr.open("GET", requestURL, true);
@@ -716,7 +724,8 @@ export const qianqista = {
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4 && (xhr.status >= 200 && xhr.status < 300)) {
                 try {
-                    var ret = JSON.parse(xhr.responseText);
+                    var ret = JSON.parse(xhr.response);
+                    
                     if (handler !== null) {
                         handler(ret);
                     }

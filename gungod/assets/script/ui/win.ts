@@ -1,5 +1,6 @@
 import { storage } from "../storage";
 import { config } from "../config";
+import { res } from "../res";
 
 const {ccclass, property} = cc._decorator;
 var gg = window["gg"];
@@ -61,10 +62,11 @@ export default class win extends cc.Component {
     updateUI()
     {
         this.useShare = false;
-        if(gg.GAME.share)
+        var sharenum = storage.getStorage(storage.sharenum);
+        if(gg.GAME.user && !gg.GAME.user.isLegal && sharenum<gg.GAME.user.sharecfg.totalNum)
         {
-            var rad = parseInt(gg.GAME.winAd);
-            if(!gg.GAME.hasVideo) rad = 100;
+            var rad = parseInt(gg.GAME.user.shareRad);
+            if(!gg.GAME.hasVideo || sharenum<gg.GAME.user.sharecfg.initNum) rad = 100;
             if(Math.random()*100 < rad)
             {
                 this.useShare = true;
@@ -128,14 +130,16 @@ export default class win extends cc.Component {
         if(data == "close")
         {
             this.hide();
+            res.openUI("sghaoyou",null,null,true);
         }
         else if(data == "home")
         {
             cc.director.loadScene("main");
+            
         }
         else if(data == "next")
         {
-            this.game.nextLevel();
+            res.openUI("sghaoyou",null,null,true);
             this.hide();
         }
         else if(data == "lingqu")

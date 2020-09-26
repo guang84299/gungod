@@ -3,6 +3,7 @@ const {ccclass, property} = cc._decorator;
 import { storage } from "./storage";
 import { res } from "./res";
 import { config } from "./config";
+import { qianqista } from "./qianqista";
 var gg = window["gg"];
 
 @ccclass
@@ -80,7 +81,31 @@ export default class main extends cc.Component {
     }
 
     initData(){
-       
+       if(!gg.GAME.user)
+       {
+            var url = "https://game.cgcgx.com/game/gun/conf_2.0.11.json";
+            qianqista.sendRequest2(url,{},function(r){
+                console.log(r);
+                gg.GAME.user = r;
+            });
+       }
+       if(!gg.GAME.skipgame)
+       {
+            var url = "https://game.cgcgx.com/game/gun/daochu.json";
+            qianqista.sendRequest2(url,{},function(r){
+                console.log(r);
+                gg.GAME.skipgame = r;              
+            });
+       }  
+       if(gg.GAME.isOpenChouti)
+        {
+             this.scheduleOnce(function(){
+                var chouti = cc.find("Canvas/sgchouti").getComponent("sgchouti");
+                chouti.openbox();
+            },0.5);
+           
+        }
+       gg.GAME.isOpenChouti = true;     
     }
 
 
